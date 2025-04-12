@@ -12,6 +12,14 @@
         label-width="80px"
         status-icon
       >
+        <el-form-item label="头像" prop="avatar">
+          <avatar-uploader
+            v-model="registerForm.avatar"
+            action="/api/upload/upload-avatar"
+            :headers="{ Authorization: `Bearer ${authStore.token}` }"
+          />
+        </el-form-item>
+
         <el-form-item label="邮箱" prop="email">
           <el-input
             v-model="registerForm.email"
@@ -39,7 +47,7 @@
         <el-form-item label="手机号" prop="phone">
           <el-input
             v-model="registerForm.phone"
-            placeholder="请输入手机号（选填）"
+            placeholder="请输入手机号（必填）"
           />
         </el-form-item>
 
@@ -61,14 +69,17 @@
 <script lang="ts" setup>
   import { reactive, ref } from "vue";
   import { ElMessage, type FormInstance } from "element-plus";
-  import { useAuthStore } from "@/stores/auth";
+  import { useAuthStore } from "@/stores/authStore";
+  import AvatarUploader from "./AvatarUploader.vue";
   import router from "@/router";
+  import { RegisterData } from "@/api/auth";
 
   const registerForm = reactive({
     email: "",
     password: "",
     username: "",
     phone: "",
+    avatar: "", // 添加 avatar 字段
   });
 
   const rules = {
@@ -86,18 +97,21 @@
     ],
     username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
     phone: [
+      { required: true, message: "请输入手机号", trigger: "blur" },
       {
         pattern: /^1[3456789]\d{9}$/,
         message: "请输入正确的手机号",
         trigger: "blur",
       },
     ],
+    avatar: [{ required: true, message: "请选择头像", trigger: "blur" }],
   };
 
   const loading = ref(false);
 
   const authStore = useAuthStore();
   const registerFormRef = ref<FormInstance>();
+
   const handleRegister = async (formEl: FormInstance | undefined) => {
     if (!formEl) return;
 
@@ -105,7 +119,16 @@
       if (valid) {
         loading.value = true;
         try {
-          await authStore.register(registerForm);
+          // 构造一个符合 RegisterData 类型的对象
+          const registerData: RegisterData = {
+            email: registerForm.email,
+            password: registerForm.password,
+            username: registerForm.username,
+            phone: registerForm.phone,
+            avatar: registerForm.avatar || "", // 上传后的头像 URL
+          };
+          // 调用注册接口，传递注册数据对象
+          await authStore.register(registerData);
           ElMessage.success("注册成功，请登录");
           router.push("/login");
         } catch (error: any) {
@@ -116,64 +139,8 @@
       }
     });
   };
+
   const goToLogin = () => {
     router.push("/login");
   };
 </script>
-
-<style scoped lang="scss">
-  // 定义颜色和字体变量
-  $primary-color: #409eff;
-  $text-color: #333;
-  $border-color: #dcdfe6;
-  $background-color: #f5f7fa;
-
-  // 定义边距和尺寸变量
-  $padding: 15px;
-  $margin: 20px;
-  $border-radius: 4px;
-
-  // 注册容器样式
-  .register-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: $background-color;
-  }
-  // 注册卡片样式
-  .register-card {
-    width: 100%;
-    max-width: 480px;
-    border: 1px solid $border-color;
-    border-radius: $border-radius;
-    background-color: #fff;
-  }
-  // 卡片标题样式
-  .card-title {
-    text-align: center;
-    margin: 0;
-    color: $text-color;
-  }
-  // 表单样式
-  .el-form {
-    padding: $padding;
-    .el-form-item {
-      margin-bottom: $margin;
-    }
-    .el-button {
-      margin-right: $margin;
-    }
-  }
-
-  // 响应式设计
-  @media (max-width: 768px) {
-    .register-container {
-      .el-form {
-        .el-button {
-          font-size: 14px; // 在小屏幕上减小按钮字体大小
-        }
-      }
-    }
-  }
-</style>

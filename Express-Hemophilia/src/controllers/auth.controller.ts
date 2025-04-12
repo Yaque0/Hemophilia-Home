@@ -13,7 +13,7 @@ export class AuthController {
         return;
       }
 
-      const { email, password, username, phone } = req.body;
+      const { email, password, username, phone, avatar } = req.body;
 
       // 检查邮箱是否已存在
       const existingUser = await User.findOne({ where: { email } });
@@ -30,6 +30,7 @@ export class AuthController {
         phone,
         role: "user",
         status: 1,
+        avatar,
       });
 
       const token = jwt.sign(
@@ -46,6 +47,7 @@ export class AuthController {
           email: user.email,
           username: user.username,
           role: user.role,
+          avatar: user.avatar,
         },
       });
     } catch (error) {
@@ -91,7 +93,7 @@ export class AuthController {
         { expiresIn: "24h" }
       );
 
-      res.json({
+      res.status(201).json({
         message: "登录成功",
         token,
         user: {
@@ -99,28 +101,11 @@ export class AuthController {
           email: user.email,
           username: user.username,
           role: user.role,
+          avatar: user.avatar,
         },
       });
     } catch (error) {
       console.error("登录错误:", error);
-      res.status(500).json({ message: "服务器错误" });
-    }
-  }
-
-  // 获取当前用户信息
-  static async getCurrentUser(req: Request, res: Response): Promise<void> {
-    try {
-      const user = req.user;
-      res.json({
-        user: {
-          id: user?.id,
-          email: user?.email,
-          username: user?.username,
-          role: user?.role,
-        },
-      });
-    } catch (error) {
-      console.error("获取用户信息错误:", error);
       res.status(500).json({ message: "服务器错误" });
     }
   }

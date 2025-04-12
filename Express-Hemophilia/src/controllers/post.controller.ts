@@ -92,12 +92,23 @@ export class PostController {
           },
           {
             model: Comment,
-            where: { status: 1 },
+            where: { status: 1, parentId: null }, // 获取一级评论
             required: false,
             include: [
               {
                 model: User,
                 attributes: ["id", "username", "avatar"],
+              },
+              {
+                model: Comment,
+                as: "replies", // 获取子评论
+                where: { status: 1 },
+                include: [
+                  {
+                    model: User,
+                    attributes: ["id", "username", "avatar"],
+                  },
+                ],
               },
             ],
           },

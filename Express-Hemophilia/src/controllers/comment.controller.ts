@@ -14,7 +14,7 @@ export class CommentController {
         return;
       }
 
-      const { postId, content } = req.body;
+      const { postId, content, parentId } = req.body; // 接收 parentId
       const userId = req.user?.id;
 
       if (!userId) {
@@ -29,10 +29,12 @@ export class CommentController {
         return;
       }
 
+      // 创建评论
       const comment = await Comment.create({
         postId,
         userId,
         content,
+        parentId: parentId || null, // 如果是子评论，传入 parentId
         status: 1,
       });
 
@@ -54,11 +56,23 @@ export class CommentController {
       const offset = (Number(page) - 1) * Number(limit);
 
       const { count, rows: comments } = await Comment.findAndCountAll({
-        where: { postId, status: 1 },
+        where: { postId, status: 1, parentId: null }, // 只查询一级评论
         include: [
           {
             model: User,
             attributes: ["id", "username", "avatar"],
+          },
+          {
+            model: Comment,
+            as: "replies", // 加载子评论
+            required: false, //允许没有子评论的一级评论查询
+            where: { status: 1 },
+            include: [
+              {
+                model: User,
+                attributes: ["id", "username", "avatar"],
+              },
+            ],
           },
         ],
         limit: Number(limit),

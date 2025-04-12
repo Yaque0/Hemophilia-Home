@@ -12,6 +12,7 @@ export interface RegisterData {
   password: string;
   username: string;
   phone?: string;
+  avatar?: string;
 }
 
 //登录
@@ -21,4 +22,7 @@ export const login = (data: LoginData) => {
 //注册
 export const register = (data: RegisterData) => {
   return request.post("/auth/register", data);
+};
+export const getCurrentUser = () => {
+  return request.get("/auth/getCurrentUser");
 };

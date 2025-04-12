@@ -18,7 +18,13 @@
       <template v-if="authStore.token">
         <el-dropdown>
           <span class="user-info">
-            {{ authStore.user?.username }}
+            <img
+              v-if="userStore.user?.avatar"
+              :src="userStore.user.avatar"
+              alt="Avatar"
+              class="user-avatar"
+            />
+            {{ userStore.user?.username }}
             <el-icon><arrow-down /></el-icon>
           </span>
           <template #dropdown>
@@ -40,7 +46,8 @@
 
 <script lang="ts" setup>
   import { ref } from "vue";
-  import { useAuthStore } from "@/stores/auth";
+  import { useAuthStore } from "@/stores/authStore";
+  import { useUserStore } from "@/stores/userStore";
   import { useRouter } from "vue-router";
 
   // Props
@@ -66,7 +73,10 @@
   // Router
   const router = useRouter();
   const authStore = useAuthStore();
-
+  const userStore = useUserStore();
+  console.log("====================================");
+  console.log(userStore.user);
+  console.log("====================================");
   const handleLogout = () => {
     authStore.logout();
     router.push("/login");
@@ -86,28 +96,20 @@
 </script>
 
 <style lang="scss" scoped>
-  // 温暖的色调
-  $primary-color: #f28a8c; // 温暖的粉橙色
-  $secondary-color: #f8d7d2; // 柔和的浅粉色
-  $hover-color: #ffd9d0; // 菜单项悬浮色
-  $active-color: #f28a8c; // 激活项颜色
-  $btn-hover-color: #f5b2a3; // 按钮悬浮色
-  $shadow-color: rgba(0, 0, 0, 0.1); // 柔和的阴影颜色
-
   .nav-bar-box {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 40px;
     background-color: #ffffff;
-    box-shadow: 0 4px 8px $shadow-color; // 温和的阴影
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     z-index: 10;
     user-select: none;
     position: fixed;
     top: 0;
     width: 100%;
     transition: all 0.3s ease;
-    border-bottom: 1px solid #f1f1f1; // 温和的底部边框
+    border-bottom: 1px solid #f1f1f1;
 
     .log {
       display: flex;
@@ -119,8 +121,8 @@
         width: 60px;
         height: 60px;
         margin-right: 12px;
-        border-radius: 50%; // 圆形logo
-        box-shadow: 0 4px 6px $shadow-color; // 圆形logo的阴影
+        border-radius: 50%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       }
 
       span {
@@ -133,27 +135,27 @@
     .nav-menu {
       display: flex;
       align-items: center;
-      flex-grow: 1; // 菜单部分占满剩余空间
-      justify-content: center; // 中心对齐
+      flex-grow: 1;
+      justify-content: center;
 
       .el-menu-item {
         font-size: 16px;
         font-weight: 500;
         color: #333;
         padding: 12px 25px;
-        border-radius: 8px; // 圆角
+        border-radius: 8px;
         transition: background-color 0.3s ease, color 0.3s ease;
-        margin: 0 15px; // 增加左右间距，避免过于拥挤
+        margin: 0 15px;
 
         &:hover {
-          background-color: $hover-color;
-          color: $primary-color;
+          background-color: #ffd9d0;
+          color: #f28a8c;
         }
 
         &.is-active {
-          background-color: $primary-color;
+          background-color: #f28a8c;
           color: white;
-          box-shadow: 0 4px 8px $shadow-color; // 激活项的阴影效果
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
       }
     }
@@ -162,30 +164,30 @@
       display: flex;
       align-items: center;
       gap: 20px;
-      margin-left: auto; // 将用户操作区域推到右侧
+      margin-left: auto;
       font-family: "Poppins", sans-serif;
 
       .el-button {
         font-size: 14px;
         font-weight: 600;
         padding: 8px 18px;
-        border-radius: 25px; // 圆形按钮
-        min-width: 120px; // 按钮宽度一致
-        white-space: nowrap; // 防止按钮文字被换行
+        border-radius: 25px;
+        min-width: 120px;
+        white-space: nowrap;
 
         &.el-button[type="primary"] {
-          background-color: $primary-color;
-          border-color: $primary-color;
+          background-color: #f28a8c;
+          border-color: #f28a8c;
           color: white;
           transition: background-color 0.3s ease;
 
           &:hover {
-            background-color: $btn-hover-color; // 温暖的悬浮色
+            background-color: #f5b2a3;
           }
         }
 
         .el-button {
-          background-color: $secondary-color;
+          background-color: #f8d7d2;
           color: #333;
           border: 1px solid #f0b0a3;
           transition: background-color 0.3s ease;
@@ -205,42 +207,17 @@
         transition: color 0.3s ease;
 
         &:hover {
-          color: $primary-color; // 鼠标悬停时改变颜色
+          color: #f28a8c;
+        }
+
+        .user-avatar {
+          width: 40px;
+          height: 40px;
+          margin-right: 10px;
+          border-radius: 50%;
+          object-fit: cover;
         }
       }
-    }
-  }
-
-  // 响应式调整
-  @media (max-width: 768px) {
-    .nav-bar-box {
-      padding: 10px 20px;
-    }
-
-    .log span {
-      font-size: 18px;
-    }
-
-    .nav-menu {
-      flex-direction: column;
-      align-items: flex-start;
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    .el-menu-item {
-      width: 100%;
-      text-align: left;
-      padding: 12px 20px;
-      margin: 5px 0; // 增加垂直间距
-    }
-
-    .user-actions {
-      width: 100%;
-      justify-content: space-between;
-      margin-top: 15px;
-      margin-left: 0;
-      gap: 20px; // 增加按钮间的间距，确保按钮不被挤压
     }
   }
 </style>

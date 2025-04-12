@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/authStore";
 import axios from "axios";
 import { ElMessage } from "element-plus";
 

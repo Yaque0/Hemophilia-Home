@@ -8,10 +8,17 @@ import commentRoutes from "./routes/comment.routes";
 import productRoutes from "./routes/product.routes";
 import cartRoutes from "./routes/cart.routes";
 import carouselRouter from "./routes/carousel.routes";
+import uploadRouter from "./routes/upload.routes";
+import userRouter from "./routes/user.routes";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
+// 静态文件目录
+app.use("/uploads", express.static(path.resolve(__dirname, "public/uploads")));
 
 // 中间件
 app.use(cors());
@@ -25,6 +32,8 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api", carouselRouter);
+app.use("/api/users", userRouter);
+app.use("/api/upload", uploadRouter);
 
 // 数据库连接和服务器启动
 const PORT = process.env.PORT || 3000;
