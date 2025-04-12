@@ -27,7 +27,10 @@ router.post("/upload-avatar", upload.single("file"), (req, res) => {
     return res.status(400).json({ message: "No file uploaded" });
   }
 
-  const fileUrl = `/uploads/avatar/${req.file.filename}`;
+  const fileUrl = `${req.protocol}://${req.get("host")}/uploads/avatar/${
+    req.file.filename
+  }`;
+
   return res.json({
     code: 200,
     message: "Upload successful",
