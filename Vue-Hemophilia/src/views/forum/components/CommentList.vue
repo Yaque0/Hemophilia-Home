@@ -90,7 +90,7 @@
     if (!replyContent.value.trim()) return;
 
     await createComment({
-      postId: props.postId, // ✅ 修复此处未定义
+      postId: props.postId,
       content: replyContent.value,
       parentId: commentId,
     });

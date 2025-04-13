@@ -17,6 +17,7 @@
 <script setup lang="ts">
   import { ref } from "vue";
   import { createComment } from "@/api/conmment";
+  import { ElMessage } from "element-plus";
 
   const props = defineProps<{
     postId: number; // 帖子的 id
@@ -41,9 +42,10 @@
       });
 
       content.value = ""; // 清空输入框
+      ElMessage.success("评论成功");
       emit("success"); // 触发成功事件，通知父组件刷新评论列表
     } catch (error) {
-      console.error("评论提交失败:", error);
+      ElMessage.error("提交失败，请稍后重试");
     }
   };
 </script>

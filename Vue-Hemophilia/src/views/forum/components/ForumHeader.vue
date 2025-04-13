@@ -6,8 +6,12 @@
 </template>
 
 <script setup lang="ts">
+  import { useRouter } from "vue-router";
+
+  const router = useRouter();
+
   const createdPost = () => {
-    // 发布帖子逻辑
+    router.push("/post/create"); // 跳转到创建页
   };
 </script>
 
@@ -25,7 +29,7 @@
     }
 
     .el-button {
-      background-color: #f28a8c;
+      background-color: #f5b2a3;
       color: white;
       font-size: 14px;
       font-weight: 600;

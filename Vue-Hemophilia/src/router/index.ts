@@ -31,6 +31,10 @@ const routes = [
     component: () => import("@/views/forum/components/PostDetail.vue"),
     props: true,
   },
+  {
+    path: "/post/create",
+    component: () => import("@/views/forum/components/PostCreate.vue"),
+  },
   // {
   //   path: "/shop",
   //   name: "Shop",
