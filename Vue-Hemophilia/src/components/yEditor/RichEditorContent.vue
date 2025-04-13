@@ -6,6 +6,8 @@
     @input="handleInput"
     @paste="handlePaste"
     @keydown="handleKeyDown"
+    @compositionstart="handleCompositionStart"
+    @compositionend="handleCompositionEnd"
     :placeholder="placeholder"
   ></div>
 </template>
@@ -15,7 +17,7 @@
   import { sanitizeHTML, safeLinks, preserveSelection } from "./domUtils";
   import { useHistoryManager } from "@/hooks/useHistoryManager";
   import type { EditorCommand } from "./types";
-
+  import { throttle } from "lodash-es";
   const props = defineProps<{
     modelValue: string;
     placeholder?: string;
@@ -28,8 +30,16 @@
   }>();
 
   const editorEl = ref<HTMLDivElement>();
+  const isComposing = ref(false); //用于处理中文输入的逻辑
   const history = useHistoryManager();
   let isInternalUpdate = false;
+
+  const handleCompositionStart = () => (isComposing.value = true);
+
+  const handleCompositionEnd = () => {
+    isComposing.value = false;
+    handleInput();
+  };
   //插入图片的逻辑
   const insertImage = (url: string) => {
     const img = document.createElement("img");
@@ -70,7 +80,11 @@
     handleInput();
   };
 
+  const throttledInput = throttle(() => {
+    emit("update:modelValue", editorEl.value!.innerHTML);
+  }, 300);
   const handleInput = () => {
+    if (!editorEl.value || isComposing.value) return;
     if (!editorEl.value) return;
     isInternalUpdate = true;
     const newContent = editorEl.value.innerHTML;
@@ -141,7 +155,9 @@
 
   //快捷键处理
   const handleKeyDown = (e: KeyboardEvent) => {
-    // 示例：Ctrl+Z 撤销、Ctrl+Y 重做
+    // 在组合输入阶段跳过处理
+    if (e.isComposing || isComposing.value) return;
+    // 示Ctrl+Z 撤销、Ctrl+Y 重做
     if (e.ctrlKey && e.key.toLowerCase() === "z") {
       e.preventDefault();
       undo();
