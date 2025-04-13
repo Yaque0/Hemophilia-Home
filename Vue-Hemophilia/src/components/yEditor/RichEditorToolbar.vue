@@ -1,6 +1,7 @@
 <template>
   <div class="toolbar">
     <button
+      type="button"
       v-for="item in filteredItems"
       :key="item.command"
       @click="emitCommand(item)"
