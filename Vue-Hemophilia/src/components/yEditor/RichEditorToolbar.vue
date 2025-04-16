@@ -14,17 +14,20 @@
       </button>
 
       <div v-else-if="item.type === 'dropdown'" class="dropdown">
-        <button class="toolbar-button">
+        <button class="toolbar-button" type="button">
           <span v-if="item.icon" class="icon">{{ item.icon }}</span>
           <span v-else>{{ item.label }}</span>
+          <span class="dropdown-arrow">▼</span>
         </button>
         <div class="dropdown-content">
           <button
+            type="button"
             v-for="(child, childIndex) in item.children"
             :key="childIndex"
-            @click="emitCommand(child.command)"
+            @click="handleDropdownClick(item, child)"
             :disabled="child.disabled"
           >
+            <span v-if="child.icon" class="icon">{{ child.icon }}</span>
             {{ child.label }}
           </button>
         </div>
@@ -34,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+  import { ref } from "vue";
   import type { ToolbarItem, EditorCommand } from "./types";
 
   const props = defineProps<{
@@ -42,8 +46,39 @@
 
   const emit = defineEmits(["command"]);
 
-  const emitCommand = (command: EditorCommand) => {
-    emit("command", command);
+  const emitCommand = (command?: EditorCommand) => {
+    if (command) {
+      emit("command", command);
+    }
+  };
+  const colorMap: Record<string, string> = {
+    红色: "#ff0000",
+    蓝色: "#0000ff",
+    绿色: "#00ff00",
+    黑色: "#000000",
+  };
+  const sizeMap: Record<string, string> = {
+    小: "3",
+    中: "4",
+    大: "5",
+  };
+  const activeDropdown = ref<number | null>(null);
+  const handleDropdownClick = (parent: ToolbarItem, child: ToolbarItem) => {
+    if (child.command) {
+      // 处理颜色选择
+      if (child.command === "fontColor") {
+        emit("command", "foreColor", colorMap[child.label] || "#000000");
+      }
+      // 处理字号选择
+      else if (child.command === "fontSize") {
+        emit("command", "fontSize", sizeMap[child.label] || "3");
+      }
+      // 其他命令
+      else {
+        emit("command", child.command, child.label);
+      }
+    }
+    activeDropdown.value = null;
   };
 </script>
 

@@ -71,13 +71,13 @@
   const toolbarItems: ToolbarItem[] = [
     {
       type: "button",
-      label: "Bold",
+      label: "加粗",
       command: "bold",
       icon: "B",
     },
     {
       type: "button",
-      label: "Italic",
+      label: "斜体",
       command: "italic",
       icon: "I",
     },
@@ -95,9 +95,75 @@
     },
     {
       type: "button",
-      label: "Image",
+      label: "图片",
       command: "insertImage",
       icon: "📷",
+    },
+    {
+      type: "button",
+      label: "下划线",
+      command: "underline",
+      icon: "U",
+    },
+    {
+      type: "button",
+      label: "有序列表",
+      command: "insertOrderedList",
+      icon: "1.",
+    },
+    {
+      type: "button",
+      label: "无序列表",
+      command: "insertUnorderedList",
+      icon: "•",
+    },
+    {
+      type: "dropdown",
+      label: "字号",
+      icon: "🔠",
+      children: [
+        { type: "button", label: "小", command: "fontSize", icon: "12px" },
+        { type: "button", label: "中", command: "fontSize", icon: "16px" },
+        { type: "button", label: "大", command: "fontSize", icon: "18px" },
+      ],
+    },
+    {
+      type: "dropdown",
+      label: "颜色",
+      icon: "🎨",
+      children: [
+        { type: "button", label: "红色", command: "fontColor", icon: "🔴" },
+        { type: "button", label: "蓝色", command: "fontColor", icon: "🔵" },
+        { type: "button", label: "绿色", command: "fontColor", icon: "🟢" },
+        { type: "button", label: "黑色", command: "fontColor", icon: "⚫" },
+      ],
+    },
+    {
+      type: "dropdown",
+      label: "字体",
+      icon: "🖋️",
+      children: [
+        { type: "button", label: "宋体", command: "fontName" },
+        { type: "button", label: "黑体", command: "fontName" },
+        { type: "button", label: "微软雅黑", command: "fontName" },
+        { type: "button", label: "Arial", command: "fontName" },
+      ],
+    },
+    {
+      type: "dropdown",
+      label: "对齐",
+      icon: "≡",
+      children: [
+        { type: "button", label: "左对齐", command: "justifyLeft", icon: "←" },
+        { type: "button", label: "居中", command: "justifyCenter", icon: "↔" },
+        { type: "button", label: "右对齐", command: "justifyRight", icon: "→" },
+        {
+          type: "button",
+          label: "两端对齐",
+          command: "justifyFull",
+          icon: "⇄",
+        },
+      ],
     },
   ];
   // 提交表单

@@ -134,7 +134,36 @@
           }, 0);
         }
         break;
-
+      case "underline":
+        document.execCommand("underline", false);
+        break;
+      case "insertOrderedList":
+        document.execCommand("insertOrderedList", false);
+        break;
+      case "insertUnorderedList":
+        document.execCommand("insertUnorderedList", false);
+        break;
+      case "fontColor":
+        document.execCommand("fontColor", false, payload);
+        break;
+      case "fontSize":
+        document.execCommand("fontSize", false, payload);
+        break;
+      case "fontName":
+        document.execCommand("fontName", false, payload);
+        break;
+      case "justifyLeft":
+        document.execCommand("justifyLeft", false);
+        break;
+      case "justifyCenter":
+        document.execCommand("justifyCenter", false);
+        break;
+      case "justifyRight":
+        document.execCommand("justifyRight", false);
+        break;
+      case "justifyFull":
+        document.execCommand("justifyFull", false);
+        break;
       case "insertImage":
         if (editorContent.value?.editorDom) {
           editorContent.value.editorDom.dispatchEvent(

@@ -128,4 +128,47 @@
     max-width: 100%;
     height: auto;
   }
+  .editor-content ::v-deep(u) {
+    text-decoration: underline;
+  }
+
+  .editor-content ::v-deep(ol) {
+    list-style-type: decimal;
+    padding-left: 2em;
+  }
+
+  .editor-content ::v-deep(ul) {
+    list-style-type: disc;
+    padding-left: 2em;
+  }
+  .editor-content ::v-deep(span[style*="color"]) {
+    /* 覆盖浏览器默认的字体颜色样式 */
+    color: inherit !important;
+  }
+
+  .editor-content ::v-deep(font[size]) {
+    /* 字号样式处理 */
+    font-size: inherit;
+  }
+
+  .editor-content ::v-deep([align]) {
+    /* 对齐方式处理 */
+    text-align: inherit;
+  }
+  /* 在 RichEditorContent.vue 中添加 */
+  .editor-content ::v-deep(font[size="3"]) {
+    font-size: 12px;
+  }
+
+  .editor-content ::v-deep(font[size="4"]) {
+    font-size: 16px;
+  }
+
+  .editor-content ::v-deep(font[size="5"]) {
+    font-size: 18px;
+  }
+
+  .editor-content ::v-deep(font[color]) {
+    color: inherit !important;
+  }
 </style>
