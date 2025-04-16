@@ -1,103 +1,114 @@
 <template>
-  <div class="toolbar">
-    <button
-      type="button"
-      v-for="item in filteredItems"
-      :key="item.command"
-      @click="emitCommand(item)"
-      :class="{
-        active: isActive(item.command),
-        disabled: isDisabled(item.command),
-      }"
-      :title="item.label"
-    >
-      <span v-if="item.icon" class="material-icons">{{ item.icon }}</span>
-      <span v-else>{{ item.label }}</span>
-    </button>
+  <div class="editor-toolbar">
+    <template v-for="(item, index) in items" :key="index">
+      <button
+        type="button"
+        v-if="item.type === 'button'"
+        class="toolbar-button"
+        :title="item.label"
+        @click="emitCommand(item.command)"
+        :disabled="item.disabled"
+      >
+        <span v-if="item.icon" class="icon">{{ item.icon }}</span>
+        <span v-else>{{ item.label }}</span>
+      </button>
+
+      <div v-else-if="item.type === 'dropdown'" class="dropdown">
+        <button class="toolbar-button">
+          <span v-if="item.icon" class="icon">{{ item.icon }}</span>
+          <span v-else>{{ item.label }}</span>
+        </button>
+        <div class="dropdown-content">
+          <button
+            v-for="(child, childIndex) in item.children"
+            :key="childIndex"
+            @click="emitCommand(child.command)"
+            :disabled="child.disabled"
+          >
+            {{ child.label }}
+          </button>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed } from "vue";
-  import type { EditorCommand, ToolbarItem } from "./types";
+  import type { ToolbarItem, EditorCommand } from "./types";
 
   const props = defineProps<{
     items: ToolbarItem[];
-    history?: {
-      canUndo: boolean;
-      canRedo: boolean;
-    };
   }>();
 
-  const emit = defineEmits<{
-    (e: "exec", command: EditorCommand): void;
-  }>();
+  const emit = defineEmits(["command"]);
 
-  // 过滤无效项
-  const filteredItems = computed(() => {
-    return props.items.filter((item) => {
-      if (item.command === "undo") return props.history?.canUndo;
-      if (item.command === "redo") return props.history?.canRedo;
-      return true;
-    });
-  });
-
-  // 按钮状态
-  const isActive = (cmd: EditorCommand) => {
-    return document.queryCommandState(cmd);
-  };
-
-  const isDisabled = (cmd: EditorCommand) => {
-    if (cmd === "undo") return !props.history?.canUndo;
-    if (cmd === "redo") return !props.history?.canRedo;
-    return false;
-  };
-
-  // 命令触发
-  const emitCommand = (item: ToolbarItem) => {
-    if (!isDisabled(item.command)) {
-      emit("exec", item.command);
-    }
+  const emitCommand = (command: EditorCommand) => {
+    emit("command", command);
   };
 </script>
-<style lang="scss" scoped>
-  .toolbar {
+
+<style scoped>
+  .editor-toolbar {
     display: flex;
     flex-wrap: wrap;
-    padding: 0.5rem;
-    background: #f9f9f9;
-    gap: 0.5rem;
+    gap: 2px;
+    padding: 4px;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+  }
 
-    button {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 0.3rem 0.6rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+  .toolbar-button {
+    padding: 6px 10px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+  }
 
-      &:hover {
-        background-color: #f0f0f0;
-      }
+  .toolbar-button:hover {
+    background: #eee;
+  }
 
-      &.active {
-        background-color: #409eff;
-        color: white;
-        border-color: #409eff;
-      }
+  .toolbar-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
-      &.disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    }
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
 
-    .material-icons {
-      font-size: 1.1rem;
-    }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    top: 100%;
+    left: 0;
+  }
+
+  .dropdown:hover .dropdown-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dropdown-content button {
+    padding: 8px 16px;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+
+  .dropdown-content button:hover {
+    background-color: #f1f1f1;
   }
 </style>

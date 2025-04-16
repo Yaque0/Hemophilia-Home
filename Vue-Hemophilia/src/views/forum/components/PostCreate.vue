@@ -32,13 +32,7 @@
         prop="content"
         :rules="[{ required: true, message: '请输入内容' }]"
       >
-        <RichEditor
-          v-model="form.content"
-          :sanitize-config="{
-            ALLOWED_TAGS: ['p', 'b', 'img', 'a'],
-            ALLOWED_ATTR: ['href', 'src', 'alt'],
-          }"
-        />
+        <RichEditor v-model="content" :toolbar-items="toolbarItems" />
       </el-form-item>
 
       <!-- 操作按钮 -->
@@ -56,6 +50,7 @@
   import { ElMessage } from "element-plus";
   import { createPost } from "@/api/post";
   import RichEditor from "@/components/yEditor/RichEditor.vue";
+  import { ToolbarItem } from "@/components/yEditor/types";
 
   // 分类选项
   const categories = [
@@ -71,7 +66,40 @@
     category: "",
     content: "",
   });
+  const content = ref("<p>Hello <strong>World</strong></p>");
 
+  const toolbarItems: ToolbarItem[] = [
+    {
+      type: "button",
+      label: "Bold",
+      command: "bold",
+      icon: "B",
+    },
+    {
+      type: "button",
+      label: "Italic",
+      command: "italic",
+      icon: "I",
+    },
+    {
+      type: "button",
+      label: "Undo",
+      command: "undo",
+      icon: "↩",
+    },
+    {
+      type: "button",
+      label: "Redo",
+      command: "redo",
+      icon: "↪",
+    },
+    {
+      type: "button",
+      label: "Image",
+      command: "insertImage",
+      icon: "📷",
+    },
+  ];
   // 提交表单
   const submitForm = async () => {
     try {

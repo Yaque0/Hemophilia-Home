@@ -1,206 +1,131 @@
 <template>
   <div
+    ref="editor"
     class="editor-content"
-    contenteditable
-    ref="editorEl"
+    contenteditable="true"
     @input="handleInput"
     @paste="handlePaste"
-    @keydown="handleKeyDown"
-    @compositionstart="handleCompositionStart"
-    @compositionend="handleCompositionEnd"
-    :placeholder="placeholder"
+    @keydown="handleKeydown"
   ></div>
 </template>
 
 <script setup lang="ts">
-  import { ref, watch, onMounted, nextTick } from "vue";
-  import { sanitizeHTML, safeLinks, preserveSelection } from "./domUtils";
-  import { useHistoryManager } from "@/hooks/useHistoryManager";
-  import type { EditorCommand } from "./types";
-  import { throttle } from "lodash-es";
+  import { ref, watch, onMounted } from "vue";
+  import { useEditorContext } from "@/hooks/useEditorContext";
+  import { sanitizeHTML, safeLinks, preserveSelection } from "@/utils/domUtils";
+
   const props = defineProps<{
-    modelValue: string;
-    placeholder?: string;
+    content: string;
   }>();
 
-  const emit = defineEmits<{
-    (e: "update:modelValue", value: string): void;
-    (e: "insert-image", url: string): void;
-    (e: "history-change", state: { canUndo: boolean; canRedo: boolean }): void;
-  }>();
+  const emit = defineEmits(["update:content", "paste", "command"]);
 
-  const editorEl = ref<HTMLDivElement>();
-  const isComposing = ref(false); //用于处理中文输入的逻辑
-  const history = useHistoryManager();
-  let isInternalUpdate = false;
+  const editor = ref<HTMLElement | null>(null);
+  const ctx = useEditorContext();
+  const isComposing = ref(false); // 是否处于中文输入中
 
-  const handleCompositionStart = () => (isComposing.value = true);
+  // 处理输入事件
+  const handleCompositionStart = () => {
+    isComposing.value = true;
+  };
 
   const handleCompositionEnd = () => {
     isComposing.value = false;
-    handleInput();
+    handleInput(); // 组合结束后手动触发输入更新
   };
-  //插入图片的逻辑
-  const insertImage = (url: string) => {
-    const img = document.createElement("img");
-    img.alt = "插入的图片";
-    editorEl.value?.appendChild(img); // 将图片插入到编辑区域
-  };
-  //实现编辑区域的自动调整大小
-  const setupAutoResize = () => {
-    const editor = editorEl.value;
-    if (!editor) return;
-    editor.addEventListener("input", () => {
-      // 这里通过设置编辑器的高度来实现自动调整
-      editor.style.height = "auto";
-      editor.style.height = `${editor.scrollHeight}px`;
+
+  const handleInput = () => {
+    if (!editor.value || isComposing.value) return;
+
+    // 保存当前选区
+    const selection = window.getSelection();
+    const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+
+    requestAnimationFrame(() => {
+      const html = editor.value!.innerHTML;
+      const sanitized = sanitizeHTML(html);
+      const withSafeLinks = safeLinks(sanitized);
+
+      emit("update:content", withSafeLinks);
+      ctx.handleHistory(withSafeLinks);
     });
   };
 
-  onMounted(() => {
-    initContent();
-    setupAutoResize();
-  });
-
-  const initContent = () => {
-    editorEl.value!.innerHTML = safeLinks(sanitizeHTML(props.modelValue));
-    history.push(editorEl.value!.innerHTML);
-    updateHistoryState();
+  // 处理粘贴事件
+  const handlePaste = (event: ClipboardEvent) => {
+    emit("paste", event);
   };
 
-  const execCommand = (cmd: EditorCommand, value?: string) => {
-    const selection = preserveSelection(editorEl.value!);
-    if (cmd === "insertImage" && value) {
-      insertImage(value);
-    } else {
-      document.execCommand(cmd, false, value);
+  // 处理键盘事件
+  const handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === "Enter") {
+      // 处理回车键逻辑
+      document.execCommand("formatBlock", false, "<p>");
     }
-    editorEl.value?.focus();
-    selection?.restore();
-    handleInput();
   };
 
-  const throttledInput = throttle(() => {
-    emit("update:modelValue", editorEl.value!.innerHTML);
-  }, 300);
-  const handleInput = () => {
-    if (!editorEl.value || isComposing.value) return;
-    if (!editorEl.value) return;
-    isInternalUpdate = true;
-    const newContent = editorEl.value.innerHTML;
-    emit("update:modelValue", newContent);
-    history.push(newContent);
-    updateHistoryState();
-    isInternalUpdate = false;
-  };
-
+  // 监听内容变化
   watch(
-    () => props.modelValue,
-    async (val) => {
-      if (isInternalUpdate || !editorEl.value) return;
-      const selection = preserveSelection(editorEl.value);
-      editorEl.value.innerHTML = safeLinks(sanitizeHTML(val));
-      await nextTick();
-      selection?.restore();
+    () => props.content,
+    (newVal) => {
+      if (editor.value && newVal !== editor.value.innerHTML) {
+        const selection = preserveSelection(editor.value);
+        editor.value.innerHTML = newVal; // 更新内容
+        selection?.restore(); // 恢复光标
+      }
     },
-    { flush: "post" },
   );
 
-  const updateHistoryState = () => {
-    emit("history-change", {
-      canUndo: history.canUndo.value,
-      canRedo: history.canRedo.value,
-    });
-  };
-
-  const undo = () => {
-    const content = history.undo();
-    if (content !== null && editorEl.value) {
-      editorEl.value.innerHTML = content;
-      emit("update:modelValue", content);
-      updateHistoryState();
+  // 初始化时设置内容
+  onMounted(() => {
+    if (editor.value) {
+      editor.value.innerHTML = props.content;
     }
-  };
-
-  const redo = () => {
-    const content = history.redo();
-    if (content !== null && editorEl.value) {
-      editorEl.value.innerHTML = content;
-      emit("update:modelValue", content);
-      updateHistoryState();
-    }
-  };
-  //粘贴处理
-  const handlePaste = (e: ClipboardEvent) => {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-
-    // ✅ 将 DataTransferItemList 转成数组
-    const itemArray = Array.from(items);
-
-    for (const item of itemArray) {
-      if (item.type.startsWith("image/")) {
-        const file = item.getAsFile();
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            const url = reader.result as string;
-            emit("insert-image", url);
-          };
-          reader.readAsDataURL(file);
-        }
-      }
-    }
-  };
-
-  //快捷键处理
-  const handleKeyDown = (e: KeyboardEvent) => {
-    // 在组合输入阶段跳过处理
-    if (e.isComposing || isComposing.value) return;
-    // 示Ctrl+Z 撤销、Ctrl+Y 重做
-    if (e.ctrlKey && e.key.toLowerCase() === "z") {
-      e.preventDefault();
-      undo();
-    }
-    if (e.ctrlKey && e.key.toLowerCase() === "y") {
-      e.preventDefault();
-      redo();
-    }
-  };
-
-  defineExpose({
-    editorEl,
-    execCommand,
-    undo,
-    redo,
   });
+
+  // 添加事件监听器
+  onMounted(() => {
+    if (editor.value) {
+      editor.value.addEventListener("insert-image", (e: Event) => {
+        const customEvent = e as CustomEvent<string>;
+        const img = document.createElement("img");
+        img.src = customEvent.detail;
+        img.style.maxWidth = "100%";
+        document.execCommand("insertHTML", false, img.outerHTML);
+      });
+
+      editor.value.addEventListener("upload-error", (e: Event) => {
+        const customEvent = e as CustomEvent<string>;
+        console.error("Upload error:", customEvent.detail);
+      });
+
+      editor.value.addEventListener("compositionstart", handleCompositionStart);
+      editor.value.addEventListener("compositionend", handleCompositionEnd);
+    }
+  });
+
+  defineExpose({ editorDom: editor });
 </script>
-<style lang="scss" scoped>
+
+<style scoped>
   .editor-content {
-    h1,
-    h2,
-    h3 {
-      font-weight: bold;
-      margin: 1rem 0 0.5rem;
-    }
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    min-height: 200px;
+    outline: none;
+  }
 
-    blockquote {
-      border-left: 3px solid #ccc;
-      padding-left: 1rem;
-      color: #666;
-      font-style: italic;
-      margin: 0.5rem 0;
-    }
+  .editor-content:focus {
+    border-color: #aaa;
+  }
 
-    ul,
-    ol {
-      padding-left: 1.5rem;
-      margin: 0.5rem 0;
-    }
+  .editor-content ::v-deep(p) {
+    margin: 0 0 1em 0;
+  }
 
-    a {
-      color: #409eff;
-      text-decoration: underline;
-    }
+  .editor-content ::v-deep(img) {
+    max-width: 100%;
+    height: auto;
   }
 </style>

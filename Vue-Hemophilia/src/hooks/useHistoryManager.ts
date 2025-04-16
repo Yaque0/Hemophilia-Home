@@ -1,37 +1,48 @@
+// useHistoryManager.ts
 import { ref, computed } from "vue";
-
+import { getSelectionInfo, restoreSelection } from "@/utils/domUtils";
 export function useHistoryManager(maxSteps = 100) {
-  const stack = ref<string[]>([]); // 历史记录栈
-  const index = ref(-1); // 当前栈的指针，指向当前状态所在的位置
+  const stack = ref<string[]>([]);
+  const index = ref(-1);
 
   const canUndo = computed(() => index.value > 0);
   const canRedo = computed(() => index.value < stack.value.length - 1);
 
   const push = (state: string) => {
-    stack.value = stack.value.slice(0, index.value + 1);
+    stack.value = stack.value.slice(0, index.value + 1); // 移除未来状态
     stack.value.push(state);
-    index.value = Math.min(index.value + 1, maxSteps - 1);
+    if (stack.value.length > maxSteps) {
+      stack.value.shift(); // 移除最旧记录
+    } else {
+      index.value = stack.value.length - 1;
+    }
   };
 
-  // 撤销
   const undo = (): string | null => {
+    // console.log(" current index:", index.value);
     if (canUndo.value) {
       index.value--;
+      console.log("Undo 成功，栈:", stack.value[index.value]);
+      console.log("index:", index.value);
+      console.log("stack:", stack.value);
       return stack.value[index.value];
     }
+    console.log("index:", canUndo.value, index.value);
+    console.log("Cannot undo");
     return null;
   };
 
-  // 重做
   const redo = (): string | null => {
+    // console.log("current index:", index.value);
     if (canRedo.value) {
       index.value++;
+      console.log("Redo成功，栈：", stack.value[index.value]);
       return stack.value[index.value];
     }
+    console.log("Cannot redo");
     return null;
   };
 
-  // 清空历史记录
   const clear = () => {
     stack.value = [];
     index.value = -1;

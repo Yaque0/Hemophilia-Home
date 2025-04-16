@@ -1,154 +1,209 @@
 <template>
   <div class="rich-editor">
-    <RichEditorToolbar
-      :items="toolbarItems"
-      @exec="handleCommand"
-      :history="history"
-    />
+    <RichEditorToolbar :items="toolbarItems" @command="handleCommand" />
     <RichEditorContent
-      v-model="localValue"
-      ref="contentRef"
-      @insert-image="handleImageInsert"
-      @history-change="handleHistory"
+      ref="editorContent"
+      :content="content"
+      @update:content="handleContentUpdate"
+      @paste="handlePaste"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, watch, onMounted } from "vue";
+  import { ref, onMounted, onBeforeUnmount } from "vue";
   import RichEditorToolbar from "./RichEditorToolbar.vue";
   import RichEditorContent from "./RichEditorContent.vue";
+  import { provideEditorContext } from "@/hooks/useEditorContext";
+  import { useCommandRegistry } from "@/hooks/useCommandRegistry";
+  import { sanitizeHTML, safeLinks, preserveSelection } from "@/utils/domUtils";
   import { createImageUploadPlugin } from "./plugins";
-  import { sanitizeHTML, safeLinks } from "./domUtils";
-  import type { EditorCommand, SanitizeConfig, ToolbarItem } from "./types";
+  import type { EditorCommand, EditorPlugin, ToolbarItem } from "./types";
+  // 提供编辑器上下文
+  const ctx = ref<ReturnType<typeof provideEditorContext> | null>(null);
+  ctx.value = provideEditorContext();
+  console.log("ctx", ctx.value);
 
   const props = defineProps<{
     modelValue: string;
-    sanitizeConfig?: SanitizeConfig;
+    toolbarItems?: ToolbarItem[];
+    plugins?: EditorPlugin[];
   }>();
 
-  const emit = defineEmits<{
-    (e: "update:modelValue", value: string): void;
-    (e: "command-executed", command: EditorCommand): void;
-  }>();
+  const emit = defineEmits(["update:modelValue", "command"]);
 
-  // 工具栏配置
-  const toolbarItems: ToolbarItem[] = [
-    { type: "button", label: "B", command: "bold" },
-    { type: "button", label: "I", command: "italic" },
-    { type: "button", label: "↩", command: "undo" },
-    { type: "button", label: "↪", command: "redo" },
-    { type: "button", label: "图片", command: "insertImage" },
-  ];
+  // const editorContent = ref<HTMLElement | null>(null);
+  const editorContent = ref<InstanceType<typeof RichEditorContent> | null>(
+    null,
+  );
+  const content = ref(props.modelValue);
+  const toolbarItems = props.toolbarItems ?? [];
 
-  // 安全处理内容
-  const sanitizeContent = (html: string) => {
-    const cleaned = sanitizeHTML(html, props.sanitizeConfig);
-    return safeLinks(cleaned);
-  };
-  const handleImageInsert = (url: string) => {
-    contentRef.value?.execCommand("insertImage", url);
-  };
+  // 初始化命令注册
+  const { registerKeyboardCommand } = useCommandRegistry();
 
-  // 内容双向绑定
-  const localValue = ref(sanitizeContent(props.modelValue));
-  const contentRef = ref<InstanceType<typeof RichEditorContent>>();
-  const history = ref<{ canUndo: boolean; canRedo: boolean }>({
-    canUndo: false,
-    canRedo: false,
-  });
   // 初始化插件
-  onMounted(() => {
-    const plugin = createImageUploadPlugin(async (file) => {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      return data.url;
-    });
-    plugin.install(contentRef.value?.editorEl!);
-  });
+  const plugins = ref<EditorPlugin[]>([]);
+  if (props.plugins) {
+    plugins.value = props.plugins;
+  }
 
-  // 处理编辑器命令
-  const handleCommand = (cmd: EditorCommand) => {
-    switch (cmd) {
-      case "undo":
-      case "redo":
-        contentRef.value?.[cmd]();
-        break;
-      default:
-        contentRef.value?.execCommand(cmd);
-    }
-    emit("command-executed", cmd);
-  };
-
-  // 同步内容变化
-  watch(
-    () => props.modelValue,
-    (val) => {
-      const cleanHTML = sanitizeContent(val);
-      if (cleanHTML !== localValue.value) {
-        localValue.value = cleanHTML;
-      }
+  // 默认添加图片上传插件
+  const imageUploadPlugin = createImageUploadPlugin(
+    async (file) => {
+      // 这里应该替换为实际的上传逻辑
+      return URL.createObjectURL(file);
+    },
+    {
+      maxSize: 5 * 1024 * 1024, // 5MB
     },
   );
+  plugins.value.push(imageUploadPlugin);
 
-  watch(localValue, (val) => {
-    emit("update:modelValue", val);
+  // 处理内容更新
+  const handleContentUpdate = (newContent: string) => {
+    content.value = newContent;
+    emit("update:modelValue", newContent);
+    ctx.value?.handleHistory?.(newContent);
+  };
+
+  // 处理命令
+  const handleCommand = (command: EditorCommand, payload?: any) => {
+    // console.log("handleCommand", command, payload);
+
+    switch (command) {
+      case "bold":
+        document.execCommand("bold", false);
+        break;
+      case "italic":
+        document.execCommand("italic", false);
+        break;
+      case "undo":
+        const undoContent = ctx.value?.undo();
+        console.log("undoContent", undoContent);
+
+        if (
+          undoContent !== undefined &&
+          undoContent !== null &&
+          editorContent.value?.editorDom
+        ) {
+          // 保存当前选区
+          const selection = preserveSelection(editorContent.value.editorDom);
+
+          editorContent.value.editorDom.innerHTML = undoContent;
+          content.value = undoContent;
+          emit("update:modelValue", undoContent);
+
+          // 恢复选区
+          selection?.restore();
+        }
+
+        break;
+      case "redo":
+        const redoContent = ctx.value?.redo();
+        if (
+          redoContent !== undefined &&
+          redoContent !== null &&
+          editorContent.value?.editorDom
+        ) {
+          // 保存当前选区
+          const selection = preserveSelection(editorContent.value.editorDom);
+
+          editorContent.value.editorDom.innerHTML = redoContent;
+          content.value = redoContent;
+          emit("update:modelValue", redoContent);
+
+          // 恢复选区
+          setTimeout(() => {
+            if (editorContent.value?.editorDom) {
+              const newSelection = window.getSelection();
+              if (newSelection) {
+                const range = document.createRange();
+                // 确保我们有有效的节点
+                const targetNode =
+                  editorContent.value.editorDom.childNodes.length > 0
+                    ? editorContent.value.editorDom.lastChild!
+                    : editorContent.value.editorDom;
+
+                range.selectNodeContents(targetNode);
+                range.collapse(false); // 移动到末尾
+                newSelection.removeAllRanges();
+                newSelection.addRange(range);
+              }
+            }
+          }, 0);
+        }
+        break;
+
+      case "insertImage":
+        if (editorContent.value?.editorDom) {
+          editorContent.value.editorDom.dispatchEvent(
+            new CustomEvent("trigger-image-upload"),
+          );
+        }
+        break;
+      default:
+        emit("command", command, payload);
+    }
+  };
+
+  // 处理粘贴事件
+  const handlePaste = (event: ClipboardEvent) => {
+    event.preventDefault();
+    const text = event.clipboardData?.getData("text/plain") || "";
+    const sanitized = sanitizeHTML(text);
+    document.execCommand("insertHTML", false, sanitized);
+  };
+
+  // 注册键盘快捷键
+  registerKeyboardCommand("z", () => {}, {
+    key: "z",
+    ctrl: true,
+    command: "undo",
+    execute: () => handleCommand("undo"),
   });
 
-  // 历史状态更新
-  const handleHistory = (state: typeof history.value) => {
-    history.value = state;
-  };
+  registerKeyboardCommand("y", () => {}, {
+    key: "y",
+    ctrl: true,
+    command: "redo",
+    execute: () => handleCommand("redo"),
+  });
+
+  registerKeyboardCommand("b", () => {}, {
+    key: "b",
+    ctrl: true,
+    command: "bold",
+    execute: () => handleCommand("bold"),
+  });
+
+  registerKeyboardCommand("i", () => {}, {
+    key: "i",
+    ctrl: true,
+    command: "italic",
+    execute: () => handleCommand("italic"),
+  });
+  // 安装插件
+  onMounted(() => {
+    const editorDom = editorContent.value?.editorDom;
+    if (editorDom) {
+      plugins.value.forEach((plugin) => plugin.install(editorDom));
+      ctx.value?.handleHistory?.(content.value); //  初次记录内容
+    }
+  });
+
+  // 卸载插件
+  onBeforeUnmount(() => {
+    plugins.value.forEach((plugin) => plugin.uninstall?.());
+  });
 </script>
-<style lang="scss" scoped>
+
+<style scoped>
   .rich-editor {
-    border: 1px solid #dcdfe6;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #ddd;
+    border-radius: 4px;
     display: flex;
     flex-direction: column;
-
-    .toolbar {
-      border-bottom: 1px solid #eee;
-    }
-
-    .editor-content {
-      flex: 1;
-      padding: 1rem;
-      font-size: 1rem;
-      min-height: 200px;
-      max-height: 600px;
-      overflow-y: auto;
-      line-height: 1.6;
-      word-break: break-word;
-      outline: none;
-
-      &:empty::before {
-        content: attr(placeholder);
-        color: #ccc;
-        pointer-events: none;
-      }
-
-      img {
-        max-width: 100%;
-        margin: 0.5rem 0;
-        border-radius: 4px;
-      }
-
-      pre,
-      code {
-        background-color: #f4f4f4;
-        padding: 0.2rem 0.5rem;
-        border-radius: 4px;
-        font-family: monospace;
-      }
-    }
+    min-height: 300px;
   }
 </style>
