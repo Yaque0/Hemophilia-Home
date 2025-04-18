@@ -19,6 +19,7 @@
   import { sanitizeHTML, safeLinks, preserveSelection } from "@/utils/domUtils";
   import { createImageUploadPlugin } from "./plugins";
   import type { EditorCommand, EditorPlugin, ToolbarItem } from "./types";
+  import { applyStyle } from "./commands/applyStyle";
   // 提供编辑器上下文
   const ctx = ref<ReturnType<typeof provideEditorContext> | null>(null);
   ctx.value = provideEditorContext();
@@ -62,31 +63,17 @@
 
   // 处理内容更新
   const handleContentUpdate = (newContent: string) => {
-    content.value = newContent;
-    emit("update:modelValue", newContent);
-    ctx.value?.handleHistory?.(newContent);
+    const fullHTML = editorContent.value?.editorDom?.innerHTML || newContent;
+    content.value = fullHTML;
+    emit("update:modelValue", fullHTML);
+    ctx.value?.handleHistory?.(fullHTML);
   };
 
-  // 处理命令
   const handleCommand = (command: EditorCommand, payload?: any) => {
-    // console.log("handleCommand", command, payload);
-
     switch (command) {
-      case "bold":
-        document.execCommand("bold", false);
-        break;
-      case "italic":
-        document.execCommand("italic", false);
-        break;
       case "undo":
         const undoContent = ctx.value?.undo();
-        console.log("undoContent", undoContent);
-
-        if (
-          undoContent !== undefined &&
-          undoContent !== null &&
-          editorContent.value?.editorDom
-        ) {
+        if (undoContent !== undefined && editorContent.value?.editorDom) {
           // 保存当前选区
           const selection = preserveSelection(editorContent.value.editorDom);
 
@@ -94,75 +81,83 @@
           content.value = undoContent;
           emit("update:modelValue", undoContent);
 
-          // 恢复选区
-          selection?.restore();
+          // 增强的选区恢复逻辑
+          if (undoContent === "") {
+            // 处理空内容的情况
+            const emptySpan = document.createElement("span");
+            emptySpan.innerHTML = "&#8203;"; // 零宽空格
+            editorContent.value.editorDom.appendChild(emptySpan);
+            const range = document.createRange();
+            range.selectNodeContents(emptySpan);
+            range.collapse(true);
+            selection?.restore();
+            handleContentUpdate(undoContent); // 触发内容更新
+          } else {
+            selection?.restore();
+          }
+          editorContent.value.editorDom.focus();
         }
-
         break;
       case "redo":
         const redoContent = ctx.value?.redo();
-        if (
-          redoContent !== undefined &&
-          redoContent !== null &&
-          editorContent.value?.editorDom
-        ) {
+        if (redoContent !== undefined && editorContent.value?.editorDom) {
           // 保存当前选区
           const selection = preserveSelection(editorContent.value.editorDom);
-
           editorContent.value.editorDom.innerHTML = redoContent;
           content.value = redoContent;
           emit("update:modelValue", redoContent);
 
-          // 恢复选区
-          setTimeout(() => {
-            if (editorContent.value?.editorDom) {
-              const newSelection = window.getSelection();
-              if (newSelection) {
-                const range = document.createRange();
-                // 确保我们有有效的节点
-                const targetNode =
-                  editorContent.value.editorDom.childNodes.length > 0
-                    ? editorContent.value.editorDom.lastChild!
-                    : editorContent.value.editorDom;
+          // 统一使用restore方法
+          if (redoContent === "") {
+            const emptySpan = document.createElement("span");
+            emptySpan.innerHTML = "&#8203;";
+            editorContent.value.editorDom.appendChild(emptySpan);
+            const range = document.createRange();
+            range.selectNodeContents(emptySpan);
+            range.collapse(true);
+            handleContentUpdate(redoContent); // 触发内容更新
+            selection?.restore();
+          } else {
+            selection?.restore();
+          }
 
-                range.selectNodeContents(targetNode);
-                range.collapse(false); // 移动到末尾
-                newSelection.removeAllRanges();
-                newSelection.addRange(range);
-              }
-            }
-          }, 0);
+          editorContent.value.editorDom.focus();
         }
+      case "bold":
+        applyStyle("font-weight", "bold");
+        break;
+      case "italic":
+        applyStyle("font-style", "italic");
         break;
       case "underline":
-        document.execCommand("underline", false);
+        applyStyle("text-decoration", "underline");
         break;
       case "insertOrderedList":
-        document.execCommand("insertOrderedList", false);
+        applyListStyle("ol");
         break;
       case "insertUnorderedList":
-        document.execCommand("insertUnorderedList", false);
+        applyListStyle("ul");
         break;
-      case "fontColor":
-        document.execCommand("fontColor", false, payload);
+      case "foreColor":
+        applyStyle("color", payload);
         break;
       case "fontSize":
-        document.execCommand("fontSize", false, payload);
+        applyStyle("font-size", `${payload}px`);
         break;
       case "fontName":
-        document.execCommand("fontName", false, payload);
+        applyStyle("font-family", payload);
         break;
       case "justifyLeft":
-        document.execCommand("justifyLeft", false);
+        applyTextAlignment("left");
         break;
       case "justifyCenter":
-        document.execCommand("justifyCenter", false);
+        applyTextAlignment("center");
         break;
       case "justifyRight":
-        document.execCommand("justifyRight", false);
+        applyTextAlignment("right");
         break;
       case "justifyFull":
-        document.execCommand("justifyFull", false);
+        applyTextAlignment("justify");
         break;
       case "insertImage":
         if (editorContent.value?.editorDom) {
@@ -176,12 +171,102 @@
     }
   };
 
+  // 列表处理函数
+  const applyListStyle = (listType: "ol" | "ul") => {
+    const selection = window.getSelection();
+    if (!selection?.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    const list = document.createElement(listType);
+    const li = document.createElement("li");
+
+    li.appendChild(range.extractContents());
+    list.appendChild(li);
+    range.insertNode(list);
+
+    // 选中新插入的内容
+    const newRange = document.createRange();
+    newRange.selectNodeContents(li);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+  };
+
   // 处理粘贴事件
   const handlePaste = (event: ClipboardEvent) => {
     event.preventDefault();
     const text = event.clipboardData?.getData("text/plain") || "";
     const sanitized = sanitizeHTML(text);
     document.execCommand("insertHTML", false, sanitized);
+  };
+  const applyTextAlignment = (alignment: string) => {
+    const selection = window.getSelection();
+    if (!selection?.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    if (range.collapsed) return;
+
+    // 保存选区状态
+    const savedSelection = preserveSelection(editorContent.value?.editorDom!);
+
+    const blocks = getBlockElements(range);
+
+    // 遍历并设置对齐方式
+    blocks.forEach((el) => {
+      if (el instanceof HTMLElement) {
+        el.style.cssText += `text-align: ${alignment} !important;`;
+        el.setAttribute("data-text-align", alignment);
+      }
+    });
+    // 强制触发内容更新
+    handleContentUpdate(editorContent.value?.editorDom?.innerHTML || "");
+
+    // 恢复选区并聚焦
+    savedSelection?.restore();
+    editorContent.value?.editorDom?.focus();
+  };
+
+  // 增强块级元素检测
+  const getBlockElements = (range: Range): HTMLElement[] => {
+    const blocks = new Set<HTMLElement>();
+
+    // 获取选区起始节点的最近块级父元素
+    const startContainer = range.startContainer;
+    let block: HTMLElement | null = null;
+
+    if (startContainer.nodeType === Node.TEXT_NODE) {
+      block = startContainer.parentElement;
+    } else {
+      block = startContainer as HTMLElement;
+    }
+
+    // 向上查找最近的块级元素
+    while (block && !isBlockElement(block)) {
+      block = block.parentElement;
+    }
+
+    if (block && isBlockElement(block)) {
+      blocks.add(block);
+    }
+
+    return Array.from(blocks);
+  };
+
+  const isBlockElement = (el: HTMLElement): boolean => {
+    const display = getComputedStyle(el).display;
+    return (
+      display === "block" ||
+      display === "flex" ||
+      display === "list-item" ||
+      el.tagName === "P" ||
+      el.tagName === "DIV" ||
+      el.tagName === "LI" ||
+      el.tagName === "H1" ||
+      el.tagName === "H2" ||
+      el.tagName === "H3" ||
+      el.tagName === "H4" ||
+      el.tagName === "H5" ||
+      el.tagName === "H6"
+    );
   };
 
   // 注册键盘快捷键

@@ -132,10 +132,10 @@
       label: "颜色",
       icon: "🎨",
       children: [
-        { type: "button", label: "红色", command: "fontColor", icon: "🔴" },
-        { type: "button", label: "蓝色", command: "fontColor", icon: "🔵" },
-        { type: "button", label: "绿色", command: "fontColor", icon: "🟢" },
-        { type: "button", label: "黑色", command: "fontColor", icon: "⚫" },
+        { type: "button", label: "红色", command: "foreColor", icon: "🔴" },
+        { type: "button", label: "蓝色", command: "foreColor", icon: "🔵" },
+        { type: "button", label: "绿色", command: "foreColor", icon: "🟢" },
+        { type: "button", label: "黑色", command: "foreColor", icon: "⚫" },
       ],
     },
     {

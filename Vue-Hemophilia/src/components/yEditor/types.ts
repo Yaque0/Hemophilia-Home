@@ -16,7 +16,7 @@ export type EditorCommand =
   | "justifyRight"
   | "justifyFull"
   | "fontSize" // 增加字体大小命令
-  | "fontColor" // 增加字体颜色命令
+  | "foreColor" // 增加字体颜色命令
   | "fontName" // 增加字体名称命令
   | string; // 支持自定义命令
 

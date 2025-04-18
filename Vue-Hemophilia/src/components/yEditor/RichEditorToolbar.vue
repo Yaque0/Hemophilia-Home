@@ -58,15 +58,15 @@
     黑色: "#000000",
   };
   const sizeMap: Record<string, string> = {
-    小: "3",
-    中: "4",
-    大: "5",
+    小: "12",
+    中: "16",
+    大: "18",
   };
   const activeDropdown = ref<number | null>(null);
   const handleDropdownClick = (parent: ToolbarItem, child: ToolbarItem) => {
     if (child.command) {
       // 处理颜色选择
-      if (child.command === "fontColor") {
+      if (child.command === "foreColor") {
         emit("command", "foreColor", colorMap[child.label] || "#000000");
       }
       // 处理字号选择

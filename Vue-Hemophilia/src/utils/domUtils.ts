@@ -17,8 +17,18 @@ export const sanitizeHTML = (dirty: string, config?: SanitizeConfig) => {
         "ol",
         "li",
         "a",
+        "div",
       ],
-      ALLOWED_ATTR: ["href", "src", "alt", "style", "target", "rel"],
+      ALLOWED_ATTR: [
+        "href",
+        "src",
+        "alt",
+        "style",
+        "target",
+        "rel",
+        "data-align",
+        "class",
+      ],
       ALLOWED_URI_REGEXP: /^(https?|data):/i,
     };
 

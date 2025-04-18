@@ -53,14 +53,49 @@
 
   // 处理粘贴事件
   const handlePaste = (event: ClipboardEvent) => {
-    emit("paste", event);
+    const html = event.clipboardData?.getData("text/html") || "";
+    if (html) {
+      event.preventDefault();
+      const sanitized = sanitizeHTML(html);
+      document.execCommand("insertHTML", false, sanitized);
+    } else {
+      emit("paste", event);
+    }
   };
 
   // 处理键盘事件
   const handleKeydown = (event: KeyboardEvent) => {
     if (event.key === "Enter") {
-      // 处理回车键逻辑
-      document.execCommand("formatBlock", false, "<p>");
+      event.preventDefault();
+      const selection = window.getSelection();
+      if (!selection?.rangeCount) return;
+      const range = selection.getRangeAt(0);
+      // 检查当前是否为空段落
+      const currentNode = range.startContainer;
+      const isCurrentEmpty =
+        currentNode.textContent === "" && currentNode.nodeName === "P";
+
+      const paragraph = document.createElement("p");
+      paragraph.appendChild(document.createElement("br"));
+
+      // 插入段落
+      range.deleteContents();
+      range.insertNode(paragraph);
+
+      // 设置光标到新段落中
+      const newRange = document.createRange();
+      if (isCurrentEmpty) {
+        newRange.setStart(paragraph, 0); // 跳过 <br> 标签
+      } else {
+        // 否则放在新段落末尾
+        const textNode = document.createTextNode("");
+        paragraph.appendChild(textNode);
+        newRange.setStart(textNode, 0);
+      }
+      newRange.collapse(true);
+
+      selection.removeAllRanges();
+      selection.addRange(newRange);
     }
   };
 
@@ -103,6 +138,18 @@
       editor.value.addEventListener("compositionend", handleCompositionEnd);
     }
   });
+  onMounted(() => {
+    const observer = new MutationObserver(() => {
+      emit("update:content", editor.value!.innerHTML); // 改为使用正确的引用名
+    });
+    observer.observe(editor.value!, {
+      // 使用已定义的 editor 引用
+      subtree: true,
+      childList: true,
+      attributes: true,
+      characterData: true,
+    });
+  });
 
   defineExpose({ editorDom: editor });
 </script>
@@ -122,6 +169,21 @@
 
   .editor-content ::v-deep(p) {
     margin: 0 0 1em 0;
+    text-align: start;
+  }
+
+  /* 修改这部分样式规则 */
+  .editor-content ::v-deep([data-text-align="left"]) {
+    text-align: left !important;
+  }
+  .editor-content ::v-deep([data-text-align="center"]) {
+    text-align: center !important;
+  }
+  .editor-content ::v-deep([data-text-align="right"]) {
+    text-align: right !important;
+  }
+  .editor-content ::v-deep([data-text-align="justify"]) {
+    text-align: justify !important;
   }
 
   .editor-content ::v-deep(img) {
@@ -141,31 +203,12 @@
     list-style-type: disc;
     padding-left: 2em;
   }
-  .editor-content ::v-deep(span[style*="color"]) {
-    /* 覆盖浏览器默认的字体颜色样式 */
-    color: inherit !important;
+  .editor-content ::v-deep(font[color]) {
+    color: attr(color);
   }
 
   .editor-content ::v-deep(font[size]) {
-    /* 字号样式处理 */
     font-size: inherit;
-  }
-
-  .editor-content ::v-deep([align]) {
-    /* 对齐方式处理 */
-    text-align: inherit;
-  }
-  /* 在 RichEditorContent.vue 中添加 */
-  .editor-content ::v-deep(font[size="3"]) {
-    font-size: 12px;
-  }
-
-  .editor-content ::v-deep(font[size="4"]) {
-    font-size: 16px;
-  }
-
-  .editor-content ::v-deep(font[size="5"]) {
-    font-size: 18px;
   }
 
   .editor-content ::v-deep(font[color]) {
