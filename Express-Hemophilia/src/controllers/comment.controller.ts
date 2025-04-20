@@ -47,8 +47,6 @@ export class CommentController {
       res.status(500).json({ message: "服务器错误" });
     }
   }
-
-  // 获取帖子的评论列表
   static async getList(req: Request, res: Response): Promise<void> {
     try {
       const { postId } = req.params;
@@ -56,7 +54,7 @@ export class CommentController {
       const offset = (Number(page) - 1) * Number(limit);
 
       const { count, rows: comments } = await Comment.findAndCountAll({
-        where: { postId, status: 1, parentId: null }, // 只查询一级评论
+        where: { postId, status: 1, parentId: null },
         include: [
           {
             model: User,
@@ -65,9 +63,11 @@ export class CommentController {
           },
           {
             model: Comment,
-            as: "replies", // 加载子评论
-            required: false, //允许没有子评论的一级评论查询
+            as: "replies",
+            required: false,
             where: { status: 1 },
+            limit: 3, // 首次只加载3条二级评论
+            order: [["createdAt", "DESC"]],
             include: [
               {
                 model: User,
@@ -124,6 +124,45 @@ export class CommentController {
     } catch (error) {
       console.error("删除评论错误:", error);
       res.status(500).json({ message: "服务器错误" });
+    }
+  }
+  // 获取更深层次的评论
+  static async getDeepComments(req: Request, res: Response): Promise<void> {
+    try {
+      const { parentId } = req.params;
+      const { page = 1, limit = 10 } = req.query;
+      const offset = (Number(page) - 1) * Number(limit);
+
+      const { count, rows: comments } = await Comment.findAndCountAll({
+        where: {
+          parentId: Number(parentId),
+          status: 1,
+        },
+        include: [
+          {
+            model: User,
+            as: "user",
+            attributes: ["id", "username", "avatar"],
+          },
+        ],
+        limit: Number(limit),
+        offset,
+        order: [["createdAt", "DESC"]],
+      });
+
+      res.json({
+        comments,
+        total: count,
+        currentPage: Number(page),
+        totalPages: Math.ceil(count / Number(limit)),
+        hasMore: count > offset + comments.length,
+      });
+    } catch (error) {
+      console.error("获取深层评论错误:", error);
+      res.status(500).json({
+        message: "服务器错误",
+        error: error.message,
+      });
     }
   }
 }

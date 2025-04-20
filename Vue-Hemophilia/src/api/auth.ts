@@ -1,19 +1,5 @@
 import request from "@/utils/request";
-
-// 登录数据
-export interface LoginData {
-  email: string;
-  password: string;
-}
-
-// 注册数据
-export interface RegisterData {
-  email: string;
-  password: string;
-  username: string;
-  phone?: string;
-  avatar?: string;
-}
+import type { LoginData, RegisterData } from "@/types/auth";
 
 //登录
 export const login = (data: LoginData) => {

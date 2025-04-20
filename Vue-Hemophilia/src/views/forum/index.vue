@@ -22,7 +22,8 @@
 
 <script setup lang="ts">
   import { ref, onMounted } from "vue";
-  import { getPosts, PostData } from "@/api/post";
+  import { getPosts } from "@/api/post";
+  import type { PostData } from "@/types/post";
   import ForumHeader from "./components/ForumHeader.vue";
   import CategoryFilter from "./components/CategoryFilter.vue";
   import PostItem from "./components/PostItem.vue";

@@ -17,6 +17,7 @@ const commentValidation = [
 // 评论路由
 router.post("/", auth, commentValidation, CommentController.create);
 router.get("/post/:postId", CommentController.getList);
+router.get("/deep/:parentId", CommentController.getDeepComments);
 router.delete("/:id", auth, CommentController.delete);
 
 export default router;

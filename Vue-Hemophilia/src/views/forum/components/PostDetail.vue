@@ -33,13 +33,12 @@
     <div class="comments-section">
       <h3>评论</h3>
 
-      <!-- 评论输入框 -->
       <CommentForm :postId="postId" @success="fetchComments" />
 
       <CommentList
         v-if="comments.length"
         :comments="comments"
-        :post-id="postId"
+        :postId="postId"
         @reload="fetchComments"
       />
       <div v-else>暂无评论</div>
@@ -52,8 +51,10 @@
 <script setup lang="ts">
   import { ref, onMounted, computed } from "vue";
   import { useRoute } from "vue-router";
-  import { getPostDetail, PostData } from "@/api/post";
-  import { getPostComments, FullComment } from "@/api/conmment";
+  import { getPostDetail } from "@/api/post";
+  import type { PostData } from "@/types/post";
+  import { getPostComments } from "@/api/comment";
+  import type { FullComment } from "@/types/comment"; // 引入 FullComment 类型
   import dayjs from "dayjs";
   import CommentList from "./CommentList.vue";
   import CommentForm from "./CommentForm.vue"; // 引入 CommentForm 组件
@@ -64,7 +65,7 @@
   console.log("====================================");
   console.log("用户名", post.value);
   console.log("====================================");
-  // ✅ 显式将 route 中的 id 转为 number 类型
+  // 显式将 route 中的 id 转为 number 类型
   const postId = computed(() => Number(route.params.id));
 
   const fetchPostDetail = async () => {
@@ -86,11 +87,10 @@
   };
   const fetchComments = async () => {
     try {
-      console.log("请求评论，postId:", postId.value);
-      const res = await getPostComments(postId.value);
-
-      console.log("返回结果：", res.data);
-      comments.value = res.data.comments; // 修改为 comments
+      const res = await getPostComments(postId.value, {
+        depth: 3, // 初始加载3层
+      });
+      comments.value = res.data.comments;
     } catch (error) {
       console.error("获取评论失败", error);
     }

@@ -1,31 +1,13 @@
 import request from "@/utils/request";
 
+import type { User, UpdateUserInfo, UpdatePasswordData } from "@/types/user";
+// ... 其余代码保持不变 ...
+
 // 用户信息类型
-export interface UserInfo {
-  id: number;
-  email: string;
-  username: string;
-  role: string;
-  phone?: string;
-  avatar?: string;
-}
-
-// 修改用户信息数据
-export interface UpdateUserInfo {
-  username?: string;
-  phone?: string;
-  avatar?: string;
-}
-
-// 修改密码数据
-export interface UpdatePasswordData {
-  oldPassword: string;
-  newPassword: string;
-}
 
 // 获取当前用户信息
 export const getUserProfile = () => {
-  return request.get<{ user: UserInfo }>("/users/profile");
+  return request.get<{ user: User }>("/users/profile");
 };
 
 // 更新用户信息

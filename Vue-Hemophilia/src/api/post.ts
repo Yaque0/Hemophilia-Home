@@ -1,18 +1,6 @@
 import request from "@/utils/request";
-
-export interface PostData {
-  id: number;
-  title: string;
-  content: string;
-  user: {
-    id: number;
-    username: string;
-    avatar: string;
-  };
-  category: string;
-  views: number;
-  createdAt: Date;
-}
+// 删除原有的PostData接口
+import type { PostData } from "@/types/post";
 
 //获取帖子列表
 export const getPosts = (params?: {

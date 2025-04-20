@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-  import { PostData } from "@/api/post";
+  import { PostData } from "@/types/post";
   import { useRouter } from "vue-router";
 
   const props = defineProps({

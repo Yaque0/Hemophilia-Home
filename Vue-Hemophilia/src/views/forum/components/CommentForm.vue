@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
   import { ref } from "vue";
-  import { createComment } from "@/api/conmment";
+  import { createComment } from "@/api/comment";
   import { ElMessage } from "element-plus";
 
   const props = defineProps<{

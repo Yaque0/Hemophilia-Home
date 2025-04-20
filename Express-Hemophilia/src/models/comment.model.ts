@@ -78,11 +78,22 @@ Comment.belongsTo(User, {
   foreignKey: "userId",
   as: "user", // 保持与post模型一致
 });
-Comment.belongsTo(Comment, { foreignKey: "parentId", as: "parent" }); // 多级评论的父级关联
+Comment.belongsTo(Comment, {
+  foreignKey: "parentId",
+  as: "parent",
+  constraints: false, // 避免循环引用约束
+});
+
 Post.hasMany(Comment, { foreignKey: "postId" });
 User.hasMany(Comment, {
   foreignKey: "userId",
   as: "comments",
 });
-Comment.hasMany(Comment, { foreignKey: "parentId", as: "replies" }); // 多级评论的子级关联
+Comment.hasMany(Comment, {
+  foreignKey: "parentId",
+  as: "replies",
+  scope: {
+    status: 1,
+  },
+});
 export default Comment;

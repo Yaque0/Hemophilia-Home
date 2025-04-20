@@ -1,10 +1,6 @@
 import request from "@/utils/request";
+import type { CartItemData } from "@/types/cart";
 
-// 购物车商品模型
-export interface CartItemData {
-  productId: number;
-  quantity: number;
-}
 // 加入购物车
 export const addToCart = (data: CartItemData) => {
   return request.post("/cart", data);

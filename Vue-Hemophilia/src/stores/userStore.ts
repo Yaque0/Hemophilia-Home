@@ -1,6 +1,5 @@
-// stores/userStore.ts
 import { defineStore } from "pinia";
-import { getUserProfile } from "@/api/user"; // ✅ 从 user API 获取用户信息
+import { getUserProfile } from "@/api/user";
 import type { User } from "@/types/user";
 
 export const useUserStore = defineStore("user", {
