@@ -43,7 +43,11 @@ async function startServer() {
     await sequelize.authenticate();
     console.log("数据库连接成功");
 
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({
+      alter: false,
+      logging: console.log,
+      force: false,
+    });
     console.log("数据库同步完成");
 
     app.listen(PORT, () => {

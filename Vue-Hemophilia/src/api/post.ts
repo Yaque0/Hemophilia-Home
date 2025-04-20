@@ -26,7 +26,18 @@ export const getPosts = (params?: {
 
 //获取帖子详情
 export const getPostDetail = (id: number) => {
-  return request.get(`/posts/${id}`);
+  return request.get(`/posts/${id}`).then((res) => {
+    if (res.data?.post) {
+      return {
+        ...res.data,
+        post: {
+          ...res.data.post,
+          user: res.data.post.User || res.data.post.user, // 兼容两种写法
+        },
+      };
+    }
+    return res;
+  });
 };
 //创建帖子
 export const createPost = (data: PostData) => {

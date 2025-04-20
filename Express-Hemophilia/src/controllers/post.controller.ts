@@ -58,6 +58,7 @@ export class PostController {
         include: [
           {
             model: User,
+            as: "user",
             attributes: ["id", "username", "avatar"],
           },
         ],
@@ -88,6 +89,7 @@ export class PostController {
         include: [
           {
             model: User,
+            as: "user",
             attributes: ["id", "username", "avatar"],
           },
           {
@@ -97,6 +99,7 @@ export class PostController {
             include: [
               {
                 model: User,
+                as: "user",
                 attributes: ["id", "username", "avatar"],
               },
               {
@@ -106,6 +109,7 @@ export class PostController {
                 include: [
                   {
                     model: User,
+                    as: "user",
                     attributes: ["id", "username", "avatar"],
                   },
                 ],

@@ -7,10 +7,17 @@
 
     <!-- 元信息 -->
     <div class="post-meta">
-      <span>
-        <el-icon><User /></el-icon>
-        {{ post.user?.username }}
-      </span>
+      <!-- 用户信息 -->
+      <div class="user-info">
+        <img
+          v-if="post.user?.avatar"
+          :src="post.user.avatar"
+          class="avatar"
+          alt="用户头像"
+        />
+        <span>{{ post.user?.username }}</span>
+      </div>
+
       <span>
         <el-icon><Timer /></el-icon>
         {{ dayjs(post.createdAt).format("YYYY-MM-DD HH:mm:ss") }}
@@ -54,20 +61,29 @@
   const route = useRoute();
   const post = ref<PostData | null>(null);
   const comments = ref<FullComment[]>([]);
-
+  console.log("====================================");
+  console.log("用户名", post.value);
+  console.log("====================================");
   // ✅ 显式将 route 中的 id 转为 number 类型
   const postId = computed(() => Number(route.params.id));
 
   const fetchPostDetail = async () => {
     try {
       const res = await getPostDetail(postId.value);
-      post.value = res.data.post;
-      await fetchComments(); // 加载评论
+      console.log("API响应数据:", res); // 添加调试日志
+
+      console.log(res.post);
+
+      if (res.post) {
+        post.value = res.post;
+        await fetchComments();
+      } else {
+        console.error("返回数据格式不正确:", res);
+      }
     } catch (error) {
       console.error("获取帖子详情失败", error);
     }
   };
-
   const fetchComments = async () => {
     try {
       console.log("请求评论，postId:", postId.value);
@@ -120,5 +136,17 @@
   .comment p {
     margin: 0;
     font-size: 14px;
+  }
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
   }
 </style>

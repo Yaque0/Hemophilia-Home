@@ -74,9 +74,15 @@ Comment.init(
 
 // 关联模型：一个评论属于一个帖子和一个用户，且评论可能有父评论
 Comment.belongsTo(Post, { foreignKey: "postId" });
-Comment.belongsTo(User, { foreignKey: "userId" });
+Comment.belongsTo(User, {
+  foreignKey: "userId",
+  as: "user", // 保持与post模型一致
+});
 Comment.belongsTo(Comment, { foreignKey: "parentId", as: "parent" }); // 多级评论的父级关联
 Post.hasMany(Comment, { foreignKey: "postId" });
-User.hasMany(Comment, { foreignKey: "userId" });
+User.hasMany(Comment, {
+  foreignKey: "userId",
+  as: "comments",
+});
 Comment.hasMany(Comment, { foreignKey: "parentId", as: "replies" }); // 多级评论的子级关联
 export default Comment;

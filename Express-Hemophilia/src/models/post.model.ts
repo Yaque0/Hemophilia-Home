@@ -75,7 +75,13 @@ Post.init(
 );
 
 // 建立与用户的关联
-Post.belongsTo(User, { foreignKey: "userId" });
-User.hasMany(Post, { foreignKey: "userId" });
+Post.belongsTo(User, {
+  foreignKey: "userId",
+  as: "user",
+});
+User.hasMany(Post, {
+  foreignKey: "userId",
+  as: "posts",
+});
 
 export default Post;

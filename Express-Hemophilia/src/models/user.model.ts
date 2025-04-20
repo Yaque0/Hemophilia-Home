@@ -41,7 +41,7 @@ User.init(
       primaryKey: true,
     },
     email: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING(255),
       allowNull: false,
       unique: true,
       validate: {
@@ -84,6 +84,12 @@ User.init(
   {
     sequelize,
     tableName: "users",
+    indexes: [
+      {
+        unique: true,
+        fields: ["email"],
+      },
+    ],
     hooks: {
       beforeSave: async (user: User) => {
         if (user.changed("password")) {

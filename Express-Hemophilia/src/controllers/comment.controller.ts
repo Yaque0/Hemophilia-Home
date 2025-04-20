@@ -60,6 +60,7 @@ export class CommentController {
         include: [
           {
             model: User,
+            as: "user",
             attributes: ["id", "username", "avatar"],
           },
           {
@@ -70,6 +71,7 @@ export class CommentController {
             include: [
               {
                 model: User,
+                as: "user",
                 attributes: ["id", "username", "avatar"],
               },
             ],

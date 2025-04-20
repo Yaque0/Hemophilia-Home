@@ -51,22 +51,23 @@
   import { createPost } from "@/api/post";
   import RichEditor from "@/components/yEditor/RichEditor.vue";
   import { ToolbarItem } from "@/components/yEditor/types";
+  import { useUserStore } from "@/stores/userStore";
 
+  const userStore = useUserStore();
   // 分类选项
   const categories = [
-    { label: "护理知识", value: "tech" },
-    { label: "用药经验", value: "feedback" },
-    { label: "生活分享", value: "announcement" },
-    { label: "求助咨询", value: "help" },
+    { label: "护理知识", value: "护理知识" },
+    { label: "用药经验", value: "用药经验" },
+    { label: "生活分享", value: "生活分享" },
+    { label: "求助咨询", value: "求助咨询" },
   ];
 
   const router = useRouter();
   const form = ref({
     title: "",
     category: "",
-    content: "",
   });
-  const content = ref("<p>Hello <strong>World</strong></p>");
+  const content = ref("");
 
   const toolbarItems: ToolbarItem[] = [
     {
@@ -172,13 +173,13 @@
       // 调用创建接口
       await createPost({
         title: form.value.title,
-        content: form.value.content,
+        content: content.value,
         category: form.value.category,
         id: 0,
         user: {
-          id: 0,
-          username: "",
-          avatar: "",
+          id: userStore.user?.id || 0,
+          username: userStore.user?.username || "",
+          avatar: userStore.user?.avatar || "",
         },
         views: 0,
         createdAt: new Date(),

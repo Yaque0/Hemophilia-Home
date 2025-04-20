@@ -33,6 +33,7 @@ Cart.init(
       allowNull: false,
       references: {
         model: User,
+
         key: "id",
       },
     },
