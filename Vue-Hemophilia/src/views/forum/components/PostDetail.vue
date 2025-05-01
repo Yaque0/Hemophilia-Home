@@ -101,52 +101,78 @@
   });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
   .post-detail {
     max-width: 800px;
     margin: 0 auto;
-    padding: 20px;
-  }
+    padding: 24px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
-  .post-meta {
-    display: flex;
-    gap: 10px;
-    font-size: 12px;
-    color: #999;
-  }
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 24px;
+    }
 
-  .comment {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border-radius: 5px;
-  }
+    .post-content {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #444;
+      margin-bottom: 32px;
 
-  .post-content {
-    margin: 20px 0;
-    line-height: 1.6;
-  }
+      :deep(p) {
+        margin-bottom: 16px;
+      }
+    }
 
-  .comments-section {
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-  }
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0f0f0;
 
-  .comment p {
-    margin: 0;
-    font-size: 14px;
-  }
-  .user-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
 
-  .avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
+        .avatar {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+      }
+
+      span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 13px;
+        color: #888;
+      }
+
+      .el-tag {
+        background-color: #f5f5f5;
+        color: #666;
+        border: none;
+      }
+    }
+
+    .comments-section {
+      margin-top: 32px;
+
+      h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+      }
+    }
   }
 </style>

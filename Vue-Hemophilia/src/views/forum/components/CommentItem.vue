@@ -31,7 +31,12 @@
       />
     </div>
 
-    <button v-if="shouldShowMoreButton" @click="loadDeeper" :disabled="loading">
+    <button
+      v-if="shouldShowMoreButton"
+      @click="loadDeeper"
+      :disabled="loading"
+      class="load-more-btn"
+    >
       {{ loading ? "加载中..." : "展开更多回复" }}
     </button>
   </div>
@@ -104,53 +109,160 @@
   });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
   .comment {
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-    border-left: 2px solid #eee;
-    transition: all 0.3s;
-  }
-
-  .comment:hover {
-    background-color: #f9f9f9;
-  }
-
-  .user-info {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-  }
-
-  .avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    margin-right: 0.5rem;
-  }
-
-  .time {
-    font-size: 0.8rem;
-    color: #999;
-    display: block;
-    margin-top: 0.3rem;
-  }
-
-  .reply-form {
-    margin-top: 0.5rem;
-  }
-
-  .comment {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-left: 3px solid #e0e0e0;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      border-left-color: #409eff;
+    }
+
+    .comment-content {
+      .user-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+
+        .avatar {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          margin-right: 0.75rem;
+          object-fit: cover;
+          border: 2px solid #f5f5f5;
+        }
+
+        .username {
+          font-weight: 600;
+          color: #333;
+        }
+      }
+
+      p {
+        margin: 0 0 0.75rem 0;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #444;
+      }
+
+      .time {
+        font-size: 0.75rem;
+        color: #888;
+        display: block;
+        margin-top: 0.5rem;
+      }
+
+      button {
+        margin-top: 0.75rem;
+        padding: 0.5rem 1rem;
+        background-color: #f5f5f5;
+        border: none;
+        border-radius: 4px;
+        color: #666;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background-color: #e0e0e0;
+          color: #333;
+        }
+      }
+    }
+
+    .reply-form {
+      margin-top: 1rem;
+
+      textarea {
+        width: 100%;
+        min-height: 80px;
+        padding: 0.75rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        resize: vertical;
+        transition: border-color 0.2s ease;
+
+        &:focus {
+          outline: none;
+          border-color: #409eff;
+        }
+      }
+
+      button {
+        margin-top: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: #409eff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: #3a8ee6;
+        }
+      }
+    }
+
+    .replies {
+      margin-top: 1rem;
+      padding-left: 1.5rem;
+      border-left: 2px solid #f0f0f0;
+    }
   }
 
   .comment-enter-active,
   .comment-leave-active {
-    transition: all 0.3s;
+    transition: all 0.3s ease;
   }
+
   .comment-enter-from,
   .comment-leave-to {
     opacity: 0;
     transform: translateX(10px);
+  }
+  .load-more-btn {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    margin-top: 0.75rem;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    color: #495057;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background-color: #e9ecef;
+      border-color: #dee2e6;
+      color: #212529;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    }
   }
 </style>

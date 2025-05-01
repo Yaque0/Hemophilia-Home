@@ -18,24 +18,71 @@
     // ...
   ]);
 </script>
-
 <style scoped lang="scss">
   .hot-posts {
     background-color: #fff;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    height: 100%;
+
     h3 {
-      margin-bottom: 15px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -2px;
+        width: 60px;
+        height: 2px;
+        background-color: #67c23a;
+      }
     }
-    li {
-      margin: 8px 0;
-    }
-    a {
-      color: #67c23a;
-      text-decoration: none;
-      &:hover {
-        text-decoration: underline;
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        padding: 12px 0;
+        border-bottom: 1px dashed #eee;
+        transition: all 0.3s ease;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          transform: translateX(5px);
+        }
+      }
+
+      a {
+        color: #444;
+        text-decoration: none;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        transition: color 0.3s ease;
+
+        &::before {
+          content: "•";
+          color: #67c23a;
+          margin-right: 10px;
+          font-size: 20px;
+        }
+
+        &:hover {
+          color: #67c23a;
+        }
       }
     }
   }

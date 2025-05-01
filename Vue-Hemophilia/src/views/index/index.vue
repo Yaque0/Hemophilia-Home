@@ -30,43 +30,69 @@
   import HotPost from "./components/HotPost.vue";
   import VideoList from "./components/VideoList.vue";
 </script>
-
 <style lang="scss" scoped>
   .home-page {
-    padding: 20px;
+    padding: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+    background-color: #f8f9fa;
 
     .top-section {
       display: flex;
       justify-content: center;
-      align-items: stretch; // 所有子元素等高
-      gap: 20px;
-      margin-bottom: 40px;
+      align-items: stretch;
+      gap: 25px;
+      margin-bottom: 50px;
 
       .side-panel {
         flex: 1;
         background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
         overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+        &:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        }
       }
 
       .carousel-panel {
         flex: 1.5;
-        display: flex;
-        justify-content: center;
-        align-items: center;
         background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
         overflow: hidden;
+        transition: transform 0.3s ease;
+
+        &:hover {
+          transform: scale(1.01);
+        }
       }
     }
 
     .video-section {
       background-color: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: translateY(-5px);
+      }
+    }
+  }
+
+  @media (max-width: 992px) {
+    .home-page {
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+      .top-section {
+        flex-direction: column;
+        gap: 20px;
+      }
     }
   }
 </style>

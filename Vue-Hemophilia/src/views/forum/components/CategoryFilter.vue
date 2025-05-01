@@ -15,7 +15,6 @@
 <script setup lang="ts">
   import { ref, watch } from "vue";
 
-  // 定义类型
   interface Category {
     label: string;
     value: string;
@@ -34,41 +33,54 @@
     },
   });
 
-  // 绑定的值的类型
   const selectedCategory = ref<string>("");
+  const emit = defineEmits(["update:category", "filter"]); // 新增filter事件
 
-  // 使用 v-model 双向绑定
-  const emit = defineEmits(["update:category"]);
-
-  // Watcher 确保值发生变化时更新父组件
   watch(selectedCategory, (newValue) => {
     emit("update:category", newValue);
+    emit("filter", newValue); // 触发过滤事件
   });
 </script>
 
 <style lang="scss" scoped>
   .category-filter {
-    margin-top: 20px;
+    margin: 24px 0;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+
     .el-radio-group {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
+      justify-content: center;
 
       .el-radio-button {
         font-size: 14px;
-        color: #333;
-        border-radius: 25px; // 圆角
-        padding: 5px 15px;
-        font-weight: 600;
+        color: #666;
+        border-radius: 20px;
+        padding: 8px 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 1px solid #e0e0e0;
+        background-color: #f8f8f8;
 
         &:hover {
-          background-color: #ffd9d0;
+          background-color: #f5f5f5;
           color: #f28a8c;
+          border-color: #f28a8c;
+          transform: translateY(-2px);
+          box-shadow: 0 2px 8px rgba(242, 138, 140, 0.2);
         }
 
         &.is-checked {
           background-color: #f28a8c;
           color: white;
+          border-color: #f28a8c;
+          box-shadow: 0 2px 8px rgba(242, 138, 140, 0.3);
+
+          &:hover {
+            background-color: color.adjust(#f28a8c, $lightness: -5%);
+          }
         }
       }
     }

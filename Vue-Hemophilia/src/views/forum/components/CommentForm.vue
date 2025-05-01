@@ -50,12 +50,30 @@
   };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
   .comment-form {
-    margin-top: 16px;
-  }
-  .comment-actions {
-    margin-top: 8px;
-    text-align: right;
+    margin-bottom: 24px;
+
+    .el-textarea {
+      :deep(.el-textarea__inner) {
+        min-height: 100px;
+        padding: 12px;
+        border-radius: 8px;
+        resize: vertical;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+    }
+
+    .comment-actions {
+      margin-top: 12px;
+      text-align: right;
+
+      .el-button {
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 500;
+      }
+    }
   }
 </style>
