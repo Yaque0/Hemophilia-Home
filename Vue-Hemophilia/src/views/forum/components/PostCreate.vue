@@ -32,7 +32,7 @@
         prop="content"
         :rules="[{ required: true, message: '请输入内容' }]"
       >
-        <RichEditor v-model="content" :toolbar-items="toolbarItems" />
+        <RichEditor v-model="content" />
       </el-form-item>
 
       <!-- 操作按钮 -->
@@ -69,104 +69,6 @@
   });
   const content = ref("");
 
-  const toolbarItems: ToolbarItem[] = [
-    {
-      type: "button",
-      label: "加粗",
-      command: "bold",
-      icon: "B",
-    },
-    {
-      type: "button",
-      label: "斜体",
-      command: "italic",
-      icon: "I",
-    },
-    {
-      type: "button",
-      label: "Undo",
-      command: "undo",
-      icon: "↩",
-    },
-    {
-      type: "button",
-      label: "Redo",
-      command: "redo",
-      icon: "↪",
-    },
-    {
-      type: "button",
-      label: "图片",
-      command: "insertImage",
-      icon: "📷",
-    },
-    {
-      type: "button",
-      label: "下划线",
-      command: "underline",
-      icon: "U",
-    },
-    {
-      type: "button",
-      label: "有序列表",
-      command: "insertOrderedList",
-      icon: "1.",
-    },
-    {
-      type: "button",
-      label: "无序列表",
-      command: "insertUnorderedList",
-      icon: "•",
-    },
-    {
-      type: "dropdown",
-      label: "字号",
-      icon: "🔠",
-      children: [
-        { type: "button", label: "小", command: "fontSize", icon: "12px" },
-        { type: "button", label: "中", command: "fontSize", icon: "16px" },
-        { type: "button", label: "大", command: "fontSize", icon: "18px" },
-      ],
-    },
-    {
-      type: "dropdown",
-      label: "颜色",
-      icon: "🎨",
-      children: [
-        { type: "button", label: "红色", command: "foreColor", icon: "🔴" },
-        { type: "button", label: "蓝色", command: "foreColor", icon: "🔵" },
-        { type: "button", label: "绿色", command: "foreColor", icon: "🟢" },
-        { type: "button", label: "黑色", command: "foreColor", icon: "⚫" },
-      ],
-    },
-    {
-      type: "dropdown",
-      label: "字体",
-      icon: "🖋️",
-      children: [
-        { type: "button", label: "宋体", command: "fontName" },
-        { type: "button", label: "黑体", command: "fontName" },
-        { type: "button", label: "微软雅黑", command: "fontName" },
-        { type: "button", label: "Arial", command: "fontName" },
-      ],
-    },
-    {
-      type: "dropdown",
-      label: "对齐",
-      icon: "≡",
-      children: [
-        { type: "button", label: "左对齐", command: "justifyLeft", icon: "←" },
-        { type: "button", label: "居中", command: "justifyCenter", icon: "↔" },
-        { type: "button", label: "右对齐", command: "justifyRight", icon: "→" },
-        {
-          type: "button",
-          label: "两端对齐",
-          command: "justifyFull",
-          icon: "⇄",
-        },
-      ],
-    },
-  ];
   // 提交表单
   const submitForm = async () => {
     try {

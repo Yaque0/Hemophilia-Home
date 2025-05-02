@@ -45,13 +45,17 @@ export class PostController {
   // 获取帖子列表
   static async getList(req: Request, res: Response): Promise<void> {
     try {
-      const { page = 1, limit = 10, category } = req.query;
+      const { page = 1, limit = 10, category, sort = "newest" } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
 
       const where: any = { status: 1 };
       if (category) {
         where.category = category;
       }
+
+      // 添加排序逻辑
+      const order: [string, string][] =
+        sort === "hot" ? [["views", "DESC"]] : [["createdAt", "DESC"]];
 
       const { count, rows: posts } = await Post.findAndCountAll({
         where,
@@ -64,7 +68,7 @@ export class PostController {
         ],
         limit: Number(limit),
         offset,
-        order: [["createdAt", "DESC"]],
+        order, // 使用动态排序
       });
 
       res.json({
@@ -78,7 +82,6 @@ export class PostController {
       res.status(500).json({ message: "服务器错误" });
     }
   }
-
   // 获取帖子详情
   static async getDetail(req: Request, res: Response): Promise<void> {
     try {

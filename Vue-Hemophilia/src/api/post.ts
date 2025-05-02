@@ -8,6 +8,7 @@ export const getPosts = (params?: {
   limit?: number;
   category?: string;
   keyword?: string;
+  sort?: string;
 }) => {
   return request.get("/posts", { params });
 };

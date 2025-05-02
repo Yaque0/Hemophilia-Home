@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { getUserProfile } from "@/api/user";
 import type { User } from "@/types/user";
+import { useAuthStore } from "./authStore";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -12,6 +13,9 @@ export const useUserStore = defineStore("user", {
       const res = await getUserProfile();
       this.user = res.data.user;
       localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      const authStore = useAuthStore();
+      authStore.user = this.user;
     },
 
     setUser(user: User | null) {

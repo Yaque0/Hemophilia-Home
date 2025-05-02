@@ -13,6 +13,12 @@ const routes = [
     component: () => import("@/views/forum/index.vue"),
   },
   {
+    path: "/forum/post/:id",
+    name: "PostDetail",
+    component: () => import("@/views/forum/components/PostDetail.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
     path: "/shop",
     name: "shop",
     component: () => import("@/views/shop/index.vue"),
@@ -36,6 +42,23 @@ const routes = [
     path: "/post/create",
     component: () => import("@/views/forum/components/PostCreate.vue"),
   },
+
+  {
+    path: "/news/create",
+    name: "news-create",
+    component: () => import("@/views/index/components/CreatNews.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/news/:id",
+    name: "news-detail",
+    component: () => import("@/views/index/components/NewsDetail.vue"),
+  },
+  {
+    path: "/news",
+    name: "news",
+    component: () => import("@/views/index/components/NewsList.vue"),
+  },
   // {
   //   path: "/shop",
   //   name: "Shop",
@@ -49,32 +72,25 @@ const router = createRouter({
 });
 // ... 其他导入保持不变 ...
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
-  console.log("当前token:", authStore.token); // 调试日志
+  if (to.meta.requiresAuth) {
+    if (!authStore.token) {
+      next(`/login?redirect=${encodeURIComponent(to.fullPath)}`);
+      return;
+    }
 
-  if (to.meta.requiresAuth && !authStore.token) {
-    console.log("未登录，跳转到登录页"); // 调试日志
-    next("/login?redirect=" + encodeURIComponent(to.fullPath));
-    return;
-  }
-
-  if (authStore.token) {
     try {
-      const decoded: any = (jwt_decode as any)(authStore.token);
-      console.log("Token过期时间:", new Date(decoded.exp * 1000)); // 调试日志
-
+      // 检查token是否有效
+      const decoded: any = jwt_decode(authStore.token);
       if (decoded.exp * 1000 < Date.now()) {
-        console.log("Token已过期，执行登出"); // 调试日志
-        authStore.logout();
-        next("/login?redirect=" + encodeURIComponent(to.fullPath));
-        return;
+        // 可以在这里添加token刷新逻辑
+        throw new Error("Token expired");
       }
     } catch (err) {
-      console.error("Token解码错误:", err); // 调试日志
       authStore.logout();
-      next("/login?redirect=" + encodeURIComponent(to.fullPath));
+      next(`/login?redirect=${encodeURIComponent(to.fullPath)}`);
       return;
     }
   }

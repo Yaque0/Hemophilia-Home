@@ -1,21 +1,58 @@
 <template>
   <div class="hot-news">
-    <h3>热点新闻</h3>
+    <div class="header">
+      <h3>热点新闻</h3>
+      <el-button
+        v-if="newsList.length >= 4"
+        type="primary"
+        link
+        @click="viewAllNews"
+        class="more-btn"
+      >
+        更多
+      </el-button>
+    </div>
     <ul>
-      <li v-for="news in newsList" :key="news.id">
-        <a :href="news.link" target="_blank">{{ news.title }}</a>
+      <li v-for="news in displayedNews" :key="news.id">
+        <router-link :to="`/news/${news.id}`" class="news-link">
+          {{ news.title }}
+          <span class="views">({{ news.views }}浏览)</span>
+        </router-link>
       </li>
     </ul>
   </div>
 </template>
 
-<script lang="ts" setup>
-  import { ref, onMounted } from "vue";
-  const newsList = ref([
-    { id: 1, title: "慈善义诊活动上线", link: "#" },
-    { id: 2, title: "血友病用药最新指南发布", link: "#" },
-    // ...
-  ]);
+<script setup lang="ts">
+  import { computed, ref, onMounted } from "vue";
+  import { useRouter } from "vue-router";
+  import { getHotNews } from "@/api/news";
+
+  const router = useRouter();
+  const newsList = ref<NewsItem[]>([]);
+
+  interface NewsItem {
+    id: number;
+    title: string;
+    views: number;
+  }
+
+  const displayedNews = computed(() => {
+    return newsList.value.slice(0, 4);
+  });
+
+  onMounted(async () => {
+    try {
+      const res = await getHotNews({ sort: "hot", limit: 10 });
+      newsList.value = res.data.news;
+    } catch (error) {
+      console.error("获取热点新闻失败", error);
+    }
+  });
+
+  const viewAllNews = () => {
+    router.push("/news");
+  };
 </script>
 <style scoped lang="scss">
   .hot-news {
@@ -24,7 +61,12 @@
     padding: 25px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     height: 100%;
-
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
     h3 {
       font-size: 20px;
       font-weight: 600;

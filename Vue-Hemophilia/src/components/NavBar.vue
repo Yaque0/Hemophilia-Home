@@ -13,6 +13,13 @@
       >
         {{ item.label }}
       </el-menu-item>
+      <el-menu-item
+        v-if="authStore.token"
+        index="/news/create"
+        @click="goToCreateNews"
+      >
+        创建新闻
+      </el-menu-item>
     </el-menu>
     <div class="user-actions">
       <template v-if="authStore.token">
@@ -92,6 +99,9 @@
 
   const handleMenuClick = (path: string) => {
     router.push(path);
+  };
+  const goToCreateNews = () => {
+    router.push("/news/create");
   };
 </script>
 

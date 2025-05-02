@@ -10,6 +10,7 @@ import cartRoutes from "./routes/cart.routes";
 import carouselRouter from "./routes/carousel.routes";
 import uploadRouter from "./routes/upload.routes";
 import userRouter from "./routes/user.routes";
+import newsRouter from "./routes/news.routes";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -34,6 +35,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api", carouselRouter);
 app.use("/api/users", userRouter);
 app.use("/api/upload", uploadRouter);
+app.use("/api/news", newsRouter);
 
 // 数据库连接和服务器启动
 const PORT = process.env.PORT || 3000;
