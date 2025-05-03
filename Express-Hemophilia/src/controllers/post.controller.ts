@@ -137,3 +137,67 @@ export class PostController {
     }
   }
 }
+// ...原有代码...
+
+// 新增管理员专用接口
+export class PostAdminController {
+  // 获取所有帖子（管理员视图）
+  static async getAllForAdmin(req: Request, res: Response): Promise<void> {
+    try {
+      const { page = 1, limit = 10, status, category } = req.query;
+      const offset = (Number(page) - 1) * Number(limit);
+
+      const where: any = {};
+      if (status) where.status = status;
+      if (category) where.category = category;
+
+      const { count, rows: posts } = await Post.findAndCountAll({
+        where,
+        include: [{ model: User, attributes: ["id", "username"] }],
+        limit: Number(limit),
+        offset,
+        order: [["createdAt", "DESC"]],
+      });
+
+      res.json({
+        posts,
+        total: count,
+        currentPage: Number(page),
+        totalPages: Math.ceil(count / Number(limit)),
+      });
+    } catch (error) {
+      res.status(500).json({ message: "获取帖子列表失败" });
+    }
+  }
+
+  // 批量管理帖子
+  static async batchManage(req: Request, res: Response): Promise<void> {
+    try {
+      const { ids, action } = req.body;
+
+      let updateData = {};
+      switch (action) {
+        case "pin":
+          updateData = { isPinned: true };
+          break;
+        case "unpin":
+          updateData = { isPinned: false };
+          break;
+        case "lock":
+          updateData = { isLocked: true };
+          break;
+        case "unlock":
+          updateData = { isLocked: false };
+          break;
+        case "delete":
+          updateData = { status: 0 };
+          break;
+      }
+
+      await Post.update(updateData, { where: { id: ids } });
+      res.json({ message: "操作成功" });
+    } catch (error) {
+      res.status(500).json({ message: "操作失败" });
+    }
+  }
+}

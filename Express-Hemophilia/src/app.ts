@@ -13,7 +13,7 @@ import userRouter from "./routes/user.routes";
 import newsRouter from "./routes/news.routes";
 import path from "path";
 import { fileURLToPath } from "url";
-
+import adminRouter from "./routes/admin.routes";
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,7 +22,14 @@ const app = express();
 app.use("/uploads", express.static(path.resolve(__dirname, "public/uploads")));
 
 // 中间件
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // 主前端
+      "http://localhost:5174", // 管理端
+    ],
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -36,7 +43,7 @@ app.use("/api", carouselRouter);
 app.use("/api/users", userRouter);
 app.use("/api/upload", uploadRouter);
 app.use("/api/news", newsRouter);
-
+app.use("/api/admin", adminRouter);
 // 数据库连接和服务器启动
 const PORT = process.env.PORT || 3000;
 

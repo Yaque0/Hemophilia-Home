@@ -81,42 +81,112 @@
     max-width: 800px;
     margin: 0 auto;
     padding: 30px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 
     .back-btn {
       margin-bottom: 20px;
+      color: #666;
+      transition: all 0.3s;
+
+      &:hover {
+        color: #f28a8c;
+        transform: translateX(-3px);
+      }
     }
 
     h1 {
       font-size: 28px;
       margin-bottom: 20px;
+      color: #333;
+      line-height: 1.3;
+      position: relative;
+      padding-bottom: 15px;
+
+      &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 80px;
+        height: 3px;
+        background: #f28a8c;
+      }
     }
 
     .meta {
       display: flex;
-      gap: 15px;
+      gap: 20px;
       margin-bottom: 30px;
       color: #666;
       font-size: 14px;
+      flex-wrap: wrap;
+
+      span {
+        display: flex;
+        align-items: center;
+
+        &::before {
+          content: "";
+          display: inline-block;
+          width: 4px;
+          height: 4px;
+          background: #999;
+          border-radius: 50%;
+          margin-right: 8px;
+        }
+      }
     }
 
     .cover {
       margin-bottom: 30px;
-      border-radius: 8px;
+      border-radius: 12px;
       overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 
       :deep(.el-image) {
         width: 100%;
         max-height: 400px;
+        display: block;
       }
     }
 
     .content {
       line-height: 1.8;
       margin-bottom: 30px;
+      color: #444;
+      font-size: 16px;
+
+      :deep(p) {
+        margin-bottom: 1.5em;
+      }
+
+      :deep(img) {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 10px 0;
+      }
     }
 
     .actions {
       margin-top: 30px;
+      display: flex;
+      gap: 15px;
+
+      .el-button {
+        border-radius: 8px;
+        padding: 10px 20px;
+        transition: all 0.3s;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+      }
     }
   }
 </style>

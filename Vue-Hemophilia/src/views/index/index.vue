@@ -35,7 +35,8 @@
     padding: 30px;
     max-width: 1400px;
     margin: 0 auto;
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
 
     .top-section {
       display: flex;
@@ -46,25 +47,29 @@
 
       .side-panel {
         flex: 1;
-        background-color: #fff;
+        background: rgba(255, 255, 255, 0.9);
         border-radius: 16px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
 
         &:hover {
           transform: translateY(-5px);
-          box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
         }
       }
 
       .carousel-panel {
         flex: 1.5;
-        background-color: #fff;
+        background: rgba(255, 255, 255, 0.9);
         border-radius: 16px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         overflow: hidden;
-        transition: transform 0.3s ease;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
 
         &:hover {
           transform: scale(1.01);
@@ -73,11 +78,13 @@
     }
 
     .video-section {
-      background-color: #fff;
+      background: rgba(255, 255, 255, 0.9);
       padding: 30px;
       border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      transition: transform 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
 
       &:hover {
         transform: translateY(-5px);
@@ -87,7 +94,7 @@
 
   @media (max-width: 992px) {
     .home-page {
-      padding: 20px;
+      padding: 15px;
 
       .top-section {
         flex-direction: column;

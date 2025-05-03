@@ -103,19 +103,55 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+      h2 {
+        font-size: 24px;
+        color: #333;
+        margin: 0;
+        position: relative;
+
+        &::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          bottom: -15px;
+          width: 60px;
+          height: 3px;
+          background: #f28a8c;
+        }
+      }
+    }
+
+    .el-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      border: none;
+      overflow: hidden;
     }
 
     .news-item {
-      padding: 20px 0;
-      border-bottom: 1px solid #f0f0f0;
+      padding: 20px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+
+      &:hover {
+        background: rgba(242, 138, 140, 0.05);
+        transform: translateX(5px);
+      }
 
       .news-link {
         text-decoration: none;
         color: #333;
+        display: block;
 
         h3 {
+          font-size: 18px;
           margin-bottom: 10px;
           transition: color 0.3s;
+          color: #444;
 
           &:hover {
             color: #f28a8c;
@@ -126,11 +162,21 @@
           display: flex;
           gap: 15px;
           font-size: 14px;
-          color: #999;
+          color: #777;
 
           span {
             display: flex;
             align-items: center;
+
+            &::before {
+              content: "";
+              display: inline-block;
+              width: 4px;
+              height: 4px;
+              background: #999;
+              border-radius: 50%;
+              margin-right: 8px;
+            }
           }
         }
       }
@@ -139,6 +185,18 @@
     .el-pagination {
       margin-top: 30px;
       justify-content: center;
+
+      :deep(.btn-prev),
+      :deep(.btn-next),
+      :deep(.number) {
+        border-radius: 8px;
+        margin: 0 5px;
+      }
+
+      :deep(.active) {
+        background: #f28a8c;
+        color: white;
+      }
     }
   }
 </style>

@@ -37,7 +37,6 @@ export class NewsController {
   }
 
   // 获取新闻列表（带热度排序）
-  // 获取新闻列表（带热度排序）
   static async getAll(req: Request, res: Response): Promise<Response> {
     try {
       const { sort = "newest", page = 1, limit = 10 } = req.query;
@@ -72,7 +71,7 @@ export class NewsController {
     }
   }
 
-  // 获取新闻详情（增加浏览量）
+  // 获取新闻详情
   static async getById(req: Request, res: Response): Promise<Response> {
     try {
       const news = await News.findByPk(req.params.id, {
@@ -124,7 +123,7 @@ export class NewsController {
       return res.status(500).json({ error: "更新新闻失败" });
     }
   }
-  // 删除新闻（逻辑删除）
+  // 删除新闻
   static async delete(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
@@ -160,6 +159,48 @@ export class NewsController {
       return res.json({ likes: news.likes + 1 });
     } catch (error) {
       return res.status(500).json({ error: "点赞失败" });
+    }
+  }
+}
+
+// 新增管理员专用接口
+export class NewsAdminController {
+  // 获取所有新闻（管理员视图）
+  static async getAllForAdmin(req: Request, res: Response): Promise<void> {
+    try {
+      const { page = 1, limit = 10, status } = req.query;
+      const offset = (Number(page) - 1) * Number(limit);
+
+      const where: any = {};
+      if (status) where.status = status;
+
+      const { count, rows: news } = await News.findAndCountAll({
+        where,
+        include: [{ model: User, attributes: ["id", "username"] }],
+        limit: Number(limit),
+        offset,
+        order: [["createdAt", "DESC"]],
+      });
+
+      res.json({
+        news,
+        total: count,
+        currentPage: Number(page),
+        totalPages: Math.ceil(count / Number(limit)),
+      });
+    } catch (error) {
+      res.status(500).json({ message: "获取新闻列表失败" });
+    }
+  }
+
+  // 批量更新新闻状态
+  static async batchUpdateStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const { ids, status } = req.body;
+      await News.update({ status }, { where: { id: ids } });
+      res.json({ message: "批量更新成功" });
+    } catch (error) {
+      res.status(500).json({ message: "批量更新失败" });
     }
   }
 }
