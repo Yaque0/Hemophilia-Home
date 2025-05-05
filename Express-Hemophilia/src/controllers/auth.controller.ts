@@ -21,14 +21,14 @@ export class AuthController {
         res.status(400).json({ message: "该邮箱已被注册" });
         return;
       }
-
+      const isAdminRegister = req.headers["x-admin-register"] === "true";
       // 创建新用户
       const user = await User.create({
         email,
         password,
         username,
         phone,
-        role: "user",
+        role: isAdminRegister ? "admin" : "user", // 根据请求头设置角色
         status: 1,
         avatar,
       });

@@ -59,7 +59,9 @@
           >
             注册
           </el-button>
-          <el-button @click="goToLogin">返回登录</el-button>
+          <el-button type="primary" @click="$emit('go-to-login')">
+            已有账号？去登录
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -72,7 +74,7 @@
   import { useAuthStore } from "@/stores/authStore";
   import AvatarUploader from "./AvatarUploader.vue";
   import router from "@/router";
-  import { RegisterData } from "@/api/auth";
+  import { RegisterData } from "@/types/auth";
 
   const registerForm = reactive({
     email: "",
@@ -144,3 +146,77 @@
     router.push("/login");
   };
 </script>
+
+<style lang="scss" scoped>
+  $primary-color: #f28a8c;
+  $secondary-color: #409eff;
+  $text-color: #606266;
+
+  .register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+    .register-card {
+      width: 480px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+
+      .card-title {
+        text-align: center;
+        color: $primary-color;
+        font-size: 24px;
+        margin: 0;
+      }
+
+      :deep(.el-form-item) {
+        margin-bottom: 22px;
+
+        .el-form-item__label {
+          color: $text-color;
+          font-weight: 500;
+        }
+      }
+
+      .submit-btn {
+        width: 100%;
+        background: $primary-color;
+        border: none;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: darken($primary-color, 10%);
+          transform: translateY(-2px);
+        }
+      }
+
+      .login-link {
+        text-align: center;
+        margin-top: 16px;
+
+        a {
+          color: $secondary-color;
+          text-decoration: none;
+          transition: color 0.3s;
+
+          &:hover {
+            color: $secondary-color, 15%;
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .register-container {
+      padding: 20px;
+
+      .register-card {
+        width: 100%;
+        box-shadow: none;
+      }
+    }
+  }
+</style>

@@ -40,6 +40,16 @@
           >
             登录
           </el-button>
+          <div class="admin-login-tip">
+            管理员请
+            <el-button
+              type="text"
+              @click="$emit('go-to-admin-login')"
+              style="padding: 0 4px"
+            >
+              点击此处登录
+            </el-button>
+          </div>
           <el-button @click="goToRegister" class="el-button-custom-secondary">
             注册账号
           </el-button>
@@ -97,102 +107,95 @@
   };
 </script>
 
-<style scoped lang="scss">
-  // 定义颜色和字体变量
-  $primary-color: #409eff;
-  $text-color: #333;
-  $border-color: #dcdfe6;
-  $background-color: #f5f7fa;
-  $card-background: #fff;
-  $card-shadow: rgba(0, 0, 0, 0.1);
-  $input-background: #f7f9fb;
-
-  // 定义边距和尺寸变量
-  $padding: 20px;
-  $margin: 20px;
-  $border-radius: 10px;
-  $avatar-size: 80px;
-  $button-height: 40px; // 调整按钮高度
-  $button-font-size: 14px; // 调整按钮字体大小
+<style lang="scss" scoped>
+  $primary-color: #f28a8c;
+  $secondary-color: #409eff;
+  $text-color: #606266;
+  $secondary-color: #409eff;
 
   .login-container {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: $background-color;
-  }
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 
-  .login-card {
-    width: 100%;
-    max-width: 480px;
-    padding: $padding;
-    border-radius: $border-radius;
-    background-color: $card-background;
-    box-shadow: 0 2px 10px $card-shadow;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
+    .login-card {
+      width: 480px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      padding: 30px;
 
-  .card-title {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 24px;
-    font-weight: 600;
-    color: $primary-color;
-  }
+      .card-title {
+        text-align: center;
+        color: $primary-color;
+        font-size: 24px;
+        margin-bottom: 30px;
+      }
 
-  .el-form {
-    padding: 0;
-    .el-form-item {
-      margin-bottom: $margin;
-    }
+      :deep(.el-form-item) {
+        margin-bottom: 25px;
 
-    .el-form-item label {
-      color: $text-color;
-      font-size: 14px;
-    }
+        .el-form-item__label {
+          color: $text-color;
+          font-weight: 500;
+        }
 
-    .el-input-custom {
-      background-color: $input-background;
-      border-radius: $border-radius;
-      padding: 12px;
-    }
+        .el-input__inner {
+          border-radius: 8px;
+          padding: 12px 15px;
+          transition: all 0.3s ease;
 
-    .el-button-custom {
-      width: 100%;
-      height: $button-height; // 控制按钮高度
-      font-size: $button-font-size; // 控制按钮字体大小
-      border-radius: $border-radius;
-    }
+          &:hover {
+            border-color: $primary-color;
+          }
 
-    .el-button-custom-secondary {
-      width: 100%;
-      height: $button-height; // 控制按钮高度
-      font-size: $button-font-size; // 控制按钮字体大小
-      background-color: #f0f2f5;
-      color: #333;
-      border-color: #dcdfe6;
-      margin-top: 10px;
-    }
-  }
-
-  // 响应式设计
-  @media (max-width: 768px) {
-    .login-container {
-      .login-card {
-        max-width: 90%;
-        padding: 15px;
+          &:focus {
+            border-color: $primary-color;
+            box-shadow: 0 0 8px rgba($primary-color, 0.2);
+          }
+        }
       }
 
       .el-button-custom {
-        font-size: 13px; // 在小屏幕上减小按钮字体大小
-        height: 35px; // 小屏幕时按钮高度适当减小
+        width: 100%;
+        background: $primary-color;
+        border: none;
+        transition: all 0.3s ease;
+        padding: 12px;
+        font-size: 16px;
+
+        &:hover {
+          background: darken($primary-color, 10%);
+          transform: translateY(-2px);
+        }
       }
 
-      .card-title {
-        font-size: 20px;
+      .admin-login-tip {
+        text-align: center;
+        margin-top: 20px;
+        color: $text-color;
+
+        .el-button {
+          color: $secondary-color;
+          font-weight: 500;
+
+          &:hover {
+            color: $secondary-color, 15%;
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .login-container {
+      padding: 20px;
+
+      .login-card {
+        width: 100%;
+        box-shadow: none;
+        padding: 20px;
       }
     }
   }

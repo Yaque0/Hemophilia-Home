@@ -5,6 +5,7 @@ export interface User {
   role: string;
   avatar?: string;
   phone?: string;
+  status?: number;
 }
 
 export interface UpdateUserInfo {
