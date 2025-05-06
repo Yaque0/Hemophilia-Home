@@ -22,6 +22,7 @@ const routes = [
     path: "/shop",
     name: "shop",
     component: () => import("@/views/shop/index.vue"),
+    meta: { requiresAuth: false },
   },
   {
     path: "/login",

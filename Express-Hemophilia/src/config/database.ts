@@ -16,5 +16,13 @@ const sequelize = new Sequelize({
     underscored: true,
   },
 });
+sequelize
+  .sync({ alter: true })
+  .then(() => {
+    console.log("数据库表结构已同步");
+  })
+  .catch((error) => {
+    console.error("同步数据库表结构失败:", error);
+  });
 
 export default sequelize;

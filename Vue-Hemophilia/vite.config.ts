@@ -19,6 +19,7 @@ export default defineConfig({
         "./PostCreate": "./src/views/forum/components/PostCreate.vue",
         "./LoginView": "./src/components/LoginView.vue",
         "./RegisterView": "./src/components/RegisterView.vue",
+        "./pagination": "./src/components/pagination.vue",
       },
       shared: {
         vue: { requiredVersion: "^3.5.13", singleton: true },

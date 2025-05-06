@@ -38,9 +38,12 @@
 
     <el-pagination
       v-model:current-page="pagination.page"
-      :page-size="pagination.limit"
+      v-model:page-size="pagination.limit"
       :total="pagination.total"
+      :page-sizes="[10, 20, 50]"
+      layout="total, sizes, prev, pager, next, jumper"
       @current-change="fetchUsers"
+      @size-change="handleSizeChange"
     />
 
     <!-- 编辑用户对话框 -->
@@ -118,7 +121,11 @@ const updateUserStatus = async (user: User) => {
   // 使用导入的User类型
   await adminStore.updateUser(user.id, { status: user.status });
 };
-
+const handleSizeChange = (newSize: number) => {
+  pagination.value.limit = newSize;
+  pagination.value.page = 1;
+  fetchUsers();
+};
 onMounted(() => {
   fetchUsers();
 });

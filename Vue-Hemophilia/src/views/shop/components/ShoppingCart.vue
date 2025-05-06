@@ -1,159 +1,112 @@
 <template>
-  <div class="cart-page">
-    <h2 class="page-title">购物车</h2>
-
-    <el-table :data="cartItems" border class="cart-table">
-      <el-table-column type="selection" width="55" />
-      <el-table-column label="商品信息" min-width="300">
+  <el-drawer v-model="visible" title="购物车" size="40%">
+    <el-empty
+      v-if="shopStore.cartItems.length === 0"
+      description="购物车空空如也~"
+      image="/empty-cart.svg"
+    >
+      <el-button type="primary" @click="$router.push('/shop')"
+        >去逛逛</el-button
+      >
+    </el-empty>
+    <el-table :data="shopStore.cartItems" v-loading="shopStore.loading">
+      <el-table-column prop="product.drugName" label="药品" />
+      <el-table-column prop="product.price" label="单价" width="100">
+        <template #default="{ row }"> ¥{{ row.product.price }} </template>
+      </el-table-column>
+      <el-table-column label="数量" width="120">
         <template #default="{ row }">
-          <div class="product-info">
-            <img :src="row.image" alt="商品图" class="product-image" />
-            <div class="product-details">
-              <div class="product-name">{{ row.name }}</div>
-              <div class="product-type">{{ row.type }}</div>
-            </div>
-          </div>
+          <el-input-number
+            v-model="row.quantity"
+            :min="1"
+            @change="shopStore.updateCartItem(row.id, row.quantity)"
+          />
         </template>
       </el-table-column>
-
-      <el-table-column label="单价" width="100">
-        <template #default="{ row }"> ￥{{ row.price.toFixed(2) }} </template>
-      </el-table-column>
-
-      <el-table-column label="数量" width="150">
+      <el-table-column label="操作" width="80">
         <template #default="{ row }">
-          <el-input-number v-model="row.quantity" :min="1" :max="999" />
-        </template>
-      </el-table-column>
-
-      <el-table-column label="小计" width="100">
-        <template #default="{ row }">
-          ￥{{ (row.price * row.quantity).toFixed(2) }}
-        </template>
-      </el-table-column>
-
-      <el-table-column label="操作" width="100">
-        <template #default="{ $index }">
-          <el-button type="danger" size="small" @click="removeItem($index)"
-            >删除</el-button
+          <el-button
+            type="danger"
+            size="small"
+            @click="shopStore.removeCartItem(row.id)"
           >
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <!-- 结算区 -->
-    <div class="checkout-bar">
-      <div class="total">
-        总计：<span class="price">￥{{ totalPrice }}</span>
-      </div>
-      <el-button type="primary" size="large" @click="checkout"
-        >去结算</el-button
-      >
+    <div class="cart-summary">
+      <p>共 {{ shopStore.cartTotalItems }} 件商品</p>
+      <p class="total-price">总计: ¥{{ shopStore.cartTotalPrice }}</p>
+      <el-button type="primary" size="large">结算</el-button>
     </div>
-  </div>
+  </el-drawer>
 </template>
-<script lang="ts" setup>
-  import { ElMessage } from "element-plus";
-  import { ref, computed } from "vue";
 
-  interface CartItem {
-    name: string;
-    type: string;
-    image: string;
-    price: number;
-    quantity: number;
+<script setup lang="ts">
+  import { useShopStore } from "@/stores/shopStore";
+  import { computed } from "vue";
+
+  const shopStore = useShopStore();
+  const props = defineProps<{
+    visible: boolean;
+  }>();
+
+  const emit = defineEmits(["close"]);
+
+  const visible = computed({
+    get: () => props.visible,
+    set: (val) => !val && emit("close"),
+  });
+</script>
+
+<style scoped lang="scss">
+  $primary-color: #f28a8c;
+
+  :deep(.el-drawer) {
+    .el-drawer__header {
+      margin-bottom: 0;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .el-drawer__body {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 56px);
+    }
   }
 
-  const cartItems = ref<CartItem[]>([
-    {
-      name: "阿司匹林",
-      type: "处方药",
-      image: "/images/aspirin.jpg",
-      price: 12.5,
-      quantity: 2,
-    },
-    {
-      name: "医用棉签",
-      type: "医疗器械",
-      image: "/images/cotton_swab.jpg",
-      price: 6.8,
-      quantity: 3,
-    },
-  ]);
+  .el-table {
+    flex: 1;
+    border-top: 1px solid #f0f0f0;
 
-  const removeItem = (index: number) => {
-    cartItems.value.splice(index, 1);
-  };
+    :deep(.cell) {
+      padding: 12px 0;
+    }
+  }
 
-  const totalPrice = computed(() =>
-    cartItems.value
-      .reduce((total, item) => total + item.price * item.quantity, 0)
-      .toFixed(2),
-  );
+  .cart-summary {
+    padding: 16px;
+    border-top: 1px solid #f0f0f0;
+    text-align: right;
 
-  const checkout = () => {
-    ElMessage.success("结算成功！");
-  };
-</script>
-<style lang="scss" scoped>
-  .cart-page {
-    padding: 30px;
-
-    .page-title {
-      font-size: 26px;
-      font-weight: 600;
-      margin-bottom: 20px;
-      color: #333;
-      font-family: "Poppins", sans-serif;
+    p {
+      margin: 8px 0;
+      color: #666;
     }
 
-    .cart-table {
-      margin-bottom: 30px;
-
-      .product-info {
-        display: flex;
-        align-items: center;
-
-        .product-image {
-          width: 60px;
-          height: 60px;
-          object-fit: cover;
-          border-radius: 8px;
-          margin-right: 15px;
-          border: 1px solid #eee;
-        }
-
-        .product-details {
-          .product-name {
-            font-weight: 600;
-            font-size: 16px;
-          }
-
-          .product-type {
-            font-size: 12px;
-            color: #999;
-            margin-top: 4px;
-          }
-        }
-      }
+    .total-price {
+      font-size: 18px;
+      font-weight: bold;
+      color: $primary-color;
     }
 
-    .checkout-bar {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 20px;
-
-      .total {
-        font-size: 18px;
-        font-weight: bold;
-        color: #444;
-
-        .price {
-          color: #e74c3c;
-          font-size: 20px;
-        }
-      }
+    .el-button {
+      margin-top: 16px;
+      width: 100%;
     }
   }
 </style>

@@ -7,11 +7,11 @@ const router = Router();
 
 // 商品验证规则
 const productValidation = [
-  body("name")
+  body("drugName")
     .isString()
     .isLength({ min: 2 })
     .withMessage("商品名称至少2个字符"),
-  body("description")
+  body("indications")
     .isString()
     .isLength({ min: 10 })
     .withMessage("商品描述至少10个字符"),

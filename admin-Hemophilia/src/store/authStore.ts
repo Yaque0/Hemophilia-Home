@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { login as cLogin, register as cRegister } from "vite_provider/api";
+import api from "vite_provider/api";
 import { useRouter } from "vue-router";
 
 export const useAuthStore = defineStore("auth", {
@@ -14,7 +14,7 @@ export const useAuthStore = defineStore("auth", {
 
   actions: {
     async login(data: { email: string; password: string; isAdmin: boolean }) {
-      const response = await cLogin(data);
+      const response = await api.login(data);
       this.token = response.token;
       this.user = response.user;
 
@@ -28,7 +28,7 @@ export const useAuthStore = defineStore("auth", {
       username: string;
       role: string;
     }) {
-      const response = await cRegister({
+      const response = await api.register({
         ...data,
         role: "admin", // 强制设置为管理员
       });

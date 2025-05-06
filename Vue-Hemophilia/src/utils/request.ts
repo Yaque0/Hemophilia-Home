@@ -12,6 +12,7 @@ request.interceptors.request.use(
   (config) => {
     const authStore = useAuthStore();
     if (authStore.token) {
+      console.log("Token:", authStore.token);
       // 解码token检查是否过期
       const decoded: any = (jwt_decode as any)(authStore.token);
       if (decoded.exp * 1000 < Date.now()) {

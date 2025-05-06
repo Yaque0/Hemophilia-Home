@@ -89,7 +89,11 @@ User.init(
         unique: true,
         fields: ["email"],
       },
+      {
+        fields: ["username"], // 显式定义普通索引
+      },
     ],
+
     hooks: {
       beforeSave: async (user: User) => {
         if (user.changed("password")) {

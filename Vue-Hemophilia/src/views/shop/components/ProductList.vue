@@ -26,3 +26,17 @@
     emit("add-to-cart", product);
   }
 </script>
+
+<style scoped lang="scss">
+  .product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    padding: 16px 0;
+
+    &.loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  }
+</style>

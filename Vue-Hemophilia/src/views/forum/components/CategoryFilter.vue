@@ -43,6 +43,7 @@
 </script>
 
 <style lang="scss" scoped>
+  $primary-color: #f28a8c;
   .category-filter {
     margin: 24px 0;
     padding: 12px 0;
@@ -79,7 +80,7 @@
           box-shadow: 0 2px 8px rgba(242, 138, 140, 0.3);
 
           &:hover {
-            background-color: color.adjust(#f28a8c, $lightness: -5%);
+            background-color: color.adjust($primary-color, $lightness: -10%);
           }
         }
       }

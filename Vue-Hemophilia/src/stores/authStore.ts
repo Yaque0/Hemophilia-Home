@@ -17,7 +17,9 @@ export const useAuthStore = defineStore("auth", {
   actions: {
     async login(data: LoginData) {
       const res = await login(data);
-      this.token = res.data.token;
+      this.token = res.data.token.trim();
+      console.log(res.data.token);
+
       localStorage.setItem("token", res.data.token);
 
       // 调用 userStore 获取用户信息

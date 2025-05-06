@@ -187,7 +187,7 @@
         transition: all 0.3s ease;
 
         &:hover {
-          background: darken($primary-color, 10%);
+          background-color: color.adjust($primary-color, $lightness: -10%);
           transform: translateY(-2px);
         }
       }

@@ -166,7 +166,7 @@
         font-size: 16px;
 
         &:hover {
-          background: darken($primary-color, 10%);
+          background-color: color.adjust($primary-color, $lightness: -10%);
           transform: translateY(-2px);
         }
       }

@@ -1,78 +1,80 @@
 <template>
-  <div class="shop-page">
-    <SearchBar @search="handleSearch" />
-    <CategoryFilter :categories="categories" @select="handleCategorySelect" />
-    <ProductList :products="filteredProducts" @add-to-cart="addToCart" />
-    <ShoppingCar :item-count="cart.length" @click="goToCart" />
+  <div class="shop-container">
+    <el-row :gutter="20">
+      <!-- 侧边栏分类筛选 -->
+      <el-col :span="4">
+        <CategoryFilter
+          :categories="['全部', '凝血因子', '止血药物', '护理用品']"
+          @select="handleFilter"
+        />
+      </el-col>
+
+      <!-- 主内容区 -->
+      <el-col :span="20">
+        <SearchBar @search="handleSearch" />
+
+        <ProductList
+          :products="shopStore.products"
+          :loading="shopStore.loading"
+          @add-to-cart="handleAddToCart"
+        />
+
+        <el-pagination
+          v-model:current-page="shopStore.pagination.page"
+          :page-size="shopStore.pagination.limit"
+          :total="shopStore.pagination.total"
+          @current-change="shopStore.setPage"
+        />
+      </el-col>
+    </el-row>
+
+    <!-- 购物车侧边栏 -->
+    <ShoppingCart :visible="cartVisible" @close="cartVisible = false" />
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, computed } from "vue";
-  import SearchBar from "./components/SearchBar.vue";
+  import { ref, onMounted } from "vue";
+  import { useShopStore } from "@/stores/shopStore";
   import CategoryFilter from "./components/CategoryFillter.vue";
   import ProductList from "./components/ProductList.vue";
-  import ShoppingCar from "./components/ShoppingCart.vue";
+  import SearchBar from "./components/SearchBar.vue";
+  import ShoppingCart from "./components/ShoppingCart.vue";
 
-  const products = ref([
-    {
-      id: 1,
-      name: "阿司匹林",
-      description: "缓解疼痛",
-      price: 18.5,
-      category: "药品",
-      image: "/images/aspirin.jpg",
-    },
-    {
-      id: 2,
-      name: "轮椅",
-      description: "舒适便捷",
-      price: 350,
-      category: "医疗器械",
-      image: "/images/wheelchair.jpg",
-    },
-    // ...其他商品
-  ]);
+  const shopStore = useShopStore();
+  const cartVisible = ref(false);
 
-  const cart = ref<any[]>([]);
-  const searchTerm = ref("");
-  const selectedCategory = ref("");
-
-  const categories = ["全部", "药品", "医疗器械"];
-
-  const filteredProducts = computed(() => {
-    return products.value.filter((p) => {
-      const matchesSearch = p.name.includes(searchTerm.value);
-      const matchesCategory =
-        selectedCategory.value === "全部" ||
-        !selectedCategory.value ||
-        p.category === selectedCategory.value;
-      return matchesSearch && matchesCategory;
-    });
+  // 初始化加载商品
+  onMounted(() => {
+    shopStore.fetchProducts();
   });
 
-  function handleSearch(val: string) {
-    searchTerm.value = val;
-  }
+  const handleFilter = (category: string) => {
+    shopStore.fetchProducts({ category });
+  };
+  const handleSearch = (keyword: string) => {
+    shopStore.fetchProducts({ keyword });
+  };
 
-  function handleCategorySelect(category: string) {
-    selectedCategory.value = category;
-  }
-
-  function addToCart(product: any) {
-    cart.value.push(product);
-  }
-
-  function goToCart() {
-    // 跳转到购物车页
-  }
+  const handleAddToCart = (productId: number, quantity: number) => {
+    shopStore.addItemToCart({ productId, quantity });
+    cartVisible.value = true;
+  };
 </script>
 
 <style scoped lang="scss">
-  .shop-page {
-    padding: 20px 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  .shop-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+
+    .el-row {
+      margin-bottom: 20px;
+    }
+
+    .el-pagination {
+      margin-top: 20px;
+      justify-content: center;
+    }
   }
 </style>

@@ -21,7 +21,6 @@ export class CartController {
         return;
       }
 
-      // 检查商品是否存在
       const product = await Product.findOne({
         where: { id: productId, status: 1 },
       });
@@ -31,7 +30,6 @@ export class CartController {
         return;
       }
 
-      // 检查库存
       if (product.stock < quantity) {
         res.status(400).json({ message: "商品库存不足" });
         return;
@@ -81,7 +79,8 @@ export class CartController {
         include: [
           {
             model: Product,
-            attributes: ["id", "name", "price", "image", "stock"],
+            attributes: ["id", "drugName", "price", "image", "stock"],
+            where: { status: 1 }, // 添加状态过滤
           },
         ],
       });

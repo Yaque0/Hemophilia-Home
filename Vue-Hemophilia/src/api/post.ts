@@ -1,5 +1,5 @@
 import request from "@/utils/request";
-// 删除原有的PostData接口
+
 import type { PostData } from "@/types/post";
 
 //获取帖子列表

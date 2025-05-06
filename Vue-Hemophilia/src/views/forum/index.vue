@@ -30,7 +30,7 @@
   import ForumHeader from "./components/ForumHeader.vue";
   import CategoryFilter from "./components/CategoryFilter.vue";
   import PostItem from "./components/PostItem.vue";
-  import Pagination from "./components/Pagination.vue";
+  import Pagination from "../../components/Pagination.vue";
 
   const loading = ref(false);
   const posts = ref<PostData[]>([]);
