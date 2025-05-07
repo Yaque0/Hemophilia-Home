@@ -1,5 +1,6 @@
 <template>
   <el-row :gutter="20">
+    <CartIcon ref="cartIcon" @open-cart="$emit('open-cart')" />
     <el-col
       :xs="24"
       :sm="12"
@@ -14,16 +15,35 @@
 </template>
 
 <script setup lang="ts">
+  import { nextTick, ref } from "vue";
   import ProductCard from "./ProductCard.vue";
-
+  import CartIcon from "./CartIcon.vue";
+  import type { ProductData } from "@/types/product";
   defineProps<{
-    products: any[];
+    products: ProductData[];
+    total: number;
+    loading?: boolean;
   }>();
 
-  const emit = defineEmits(["add-to-cart"]);
+  const emit = defineEmits<{
+    (e: "add-to-cart", product: ProductData): void;
+    (e: "page-change", page: number): void;
+    (e: "open-cart"): void;
+  }>();
 
-  function onAddToCart(product: any) {
+  const currentPage = ref(1);
+  const pageSize = 12;
+  const cartIcon = ref();
+  function onAddToCart(product: ProductData) {
     emit("add-to-cart", product);
+    nextTick(() => {
+      cartIcon.value?.updateCartCount();
+    });
+  }
+
+  function handlePageChange(page: number) {
+    currentPage.value = page;
+    emit("page-change", page);
   }
 </script>
 

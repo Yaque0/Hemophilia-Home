@@ -79,13 +79,21 @@ export class CartController {
         include: [
           {
             model: Product,
+            as: "Product",
             attributes: ["id", "drugName", "price", "image", "stock"],
+            required: true,
             where: { status: 1 }, // 添加状态过滤
           },
         ],
       });
 
-      res.json({ cartItems });
+      res.json({
+        cartItems: cartItems.map((item) => ({
+          id: item.id,
+          quantity: item.quantity,
+          product: item.Product,
+        })),
+      });
     } catch (error) {
       console.error("获取购物车列表错误:", error);
       res.status(500).json({ message: "服务器错误" });
@@ -106,7 +114,13 @@ export class CartController {
 
       const cartItem = await Cart.findOne({
         where: { id, userId },
-        include: [Product],
+        include: [
+          {
+            model: Product,
+            as: "Product",
+            required: true,
+          },
+        ],
       });
 
       if (!cartItem) {
@@ -125,7 +139,10 @@ export class CartController {
 
       res.json({
         message: "更新成功",
-        cartItem,
+        cartItem: {
+          ...cartItem.get({ plain: true }),
+          product: cartItem.Product,
+        },
       });
     } catch (error) {
       console.error("更新购物车数量错误:", error);

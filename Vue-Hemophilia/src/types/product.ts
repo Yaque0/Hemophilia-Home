@@ -24,4 +24,5 @@ export interface ProductQuery {
   limit?: number;
   keyword?: string;
   category?: string;
+  status?: number;
 }

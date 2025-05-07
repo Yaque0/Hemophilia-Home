@@ -25,13 +25,17 @@ export const useShopStore = defineStore("shop", {
   }),
 
   getters: {
-    cartTotalItems: (state) =>
-      state.cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    cartTotalItems: (state) => {
+      if (!state.cartItems || state.cartItems.length === 0) return 0;
+      return state.cartItems.reduce((total, item) => total + item.quantity, 0);
+    },
     cartTotalPrice: (state) =>
-      state.cartItems.reduce(
-        (sum, item) => sum + (item.product?.price || 0) * item.quantity,
-        0,
-      ),
+      Number(
+        state.cartItems?.reduce(
+          (sum, item) => sum + (item.product?.price || 0) * item.quantity,
+          0,
+        ) || 0,
+      ).toFixed(2),
     hasStock: (state) => (productId: number) => {
       const product = state.products.find((p) => p.id === productId);
       return product ? product.stock > 0 : false;
@@ -42,18 +46,22 @@ export const useShopStore = defineStore("shop", {
     // 商品相关操作
     async fetchProducts(params?: ProductQuery) {
       this.loading = true;
-      this.error = null;
       try {
         const res = await getProducts({
           ...params,
+          status: 1, // 确保只获取上架商品
           page: this.pagination.page,
           limit: this.pagination.limit,
         });
-        this.products = res.data.products;
-        this.pagination.total = res.data.total;
+        this.pagination.total = res.data.total || 0;
+        this.products = res.data.products.map((p: { stock: number }) => ({
+          ...p,
+          stock: Math.max(p.stock, 0), // 确保库存不为负数
+        }));
       } catch (err) {
         this.error = "获取商品列表失败";
         console.error(err);
+        this.cartItems = [];
       } finally {
         this.loading = false;
       }
@@ -77,9 +85,18 @@ export const useShopStore = defineStore("shop", {
       this.loading = true;
       try {
         const res = await getCartList();
-        this.cartItems = res.data;
+        console.log("API返回的购物车数据:", res.data.cartItems);
+        this.cartItems = res.data.cartItems.map((item: any) => ({
+          ...item,
+          productId: item.product?.id,
+          product: {
+            ...item.product,
+            price: Number(item.product?.price) || 0,
+          },
+        }));
       } catch (err) {
         this.error = "获取购物车失败";
+        this.cartItems = [];
         console.error(err);
       } finally {
         this.loading = false;
@@ -88,11 +105,23 @@ export const useShopStore = defineStore("shop", {
 
     async addItemToCart(data: CartItemData) {
       try {
-        await addToCart(data);
+        // 添加认证头和参数校验
+        await addToCart(
+          {
+            productId: data.productId,
+            quantity: data.quantity,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
         await this.fetchCartItems();
-      } catch (err) {
-        this.error = "添加购物车失败";
-        console.error(err);
+      } catch (err: any) {
+        this.error =
+          err.response?.data?.errors?.[0]?.msg || "添加失败，请检查登录状态";
+        console.error("完整错误:", err.response?.data);
         throw err;
       }
     },

@@ -19,6 +19,8 @@ class Cart extends Model<CartAttributes> implements CartAttributes {
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  declare Product?: Product;
 }
 
 Cart.init(
@@ -59,7 +61,7 @@ Cart.init(
 
 // 建立关联关系
 Cart.belongsTo(User, { foreignKey: "userId" });
-Cart.belongsTo(Product, { foreignKey: "productId" });
+Cart.belongsTo(Product, { foreignKey: "productId", as: "Product" });
 User.hasMany(Cart, { foreignKey: "userId" });
 Product.hasMany(Cart, { foreignKey: "productId" });
 

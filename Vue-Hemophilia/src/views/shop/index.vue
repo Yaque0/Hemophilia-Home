@@ -1,8 +1,13 @@
 <template>
   <div class="shop-container">
-    <el-row :gutter="20">
+    <!-- 顶部搜索栏 -->
+    <div class="search-wrapper">
+      <SearchBar @search="handleSearch" />
+    </div>
+
+    <el-row :gutter="20" class="main-content">
       <!-- 侧边栏分类筛选 -->
-      <el-col :span="4">
+      <el-col :span="4" class="category-col">
         <CategoryFilter
           :categories="['全部', '凝血因子', '止血药物', '护理用品']"
           @select="handleFilter"
@@ -10,20 +15,24 @@
       </el-col>
 
       <!-- 主内容区 -->
-      <el-col :span="20">
-        <SearchBar @search="handleSearch" />
-
+      <el-col :span="20" class="product-col">
         <ProductList
           :products="shopStore.products"
+          :total="shopStore.pagination.total"
           :loading="shopStore.loading"
           @add-to-cart="handleAddToCart"
+          @open-cart="cartVisible = true"
         />
 
         <el-pagination
           v-model:current-page="shopStore.pagination.page"
           :page-size="shopStore.pagination.limit"
           :total="shopStore.pagination.total"
-          @current-change="shopStore.setPage"
+          @current-change="handlePageChange"
+          :disabled="shopStore.loading"
+          :pager-count="5"
+          background
+          class="pagination"
         />
       </el-col>
     </el-row>
@@ -40,7 +49,7 @@
   import ProductList from "./components/ProductList.vue";
   import SearchBar from "./components/SearchBar.vue";
   import ShoppingCart from "./components/ShoppingCart.vue";
-
+  import type { ProductData } from "@/types/product";
   const shopStore = useShopStore();
   const cartVisible = ref(false);
 
@@ -56,24 +65,49 @@
     shopStore.fetchProducts({ keyword });
   };
 
-  const handleAddToCart = (productId: number, quantity: number) => {
-    shopStore.addItemToCart({ productId, quantity });
+  const handleAddToCart = (product: ProductData) => {
+    shopStore.addItemToCart({
+      productId: product.id,
+      quantity: 1,
+    });
     cartVisible.value = true;
   };
+  const handlePageChange = (page: number) => {
+    shopStore.setPage(page);
+    shopStore.fetchProducts();
+  };
 </script>
-
 <style scoped lang="scss">
+  $primary-color: #f28a8c;
+
   .shop-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    min-height: calc(100vh - 120px);
 
-    .el-row {
-      margin-bottom: 20px;
+    .search-wrapper {
+      margin-bottom: 24px;
+      padding: 0 12px;
     }
 
-    .el-pagination {
-      margin-top: 20px;
+    .main-content {
+      margin: 0 !important;
+    }
+
+    .category-col {
+      padding-right: 20px !important;
+      position: sticky;
+      top: 20px;
+      height: fit-content;
+    }
+
+    .product-col {
+      padding-left: 20px !important;
+    }
+
+    .pagination {
+      margin-top: 32px;
       justify-content: center;
     }
   }

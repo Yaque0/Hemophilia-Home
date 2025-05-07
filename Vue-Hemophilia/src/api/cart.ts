@@ -2,7 +2,10 @@ import request from "@/utils/request";
 import type { CartItemData } from "@/types/cart";
 
 // 加入购物车
-export const addToCart = (data: CartItemData) => {
+export const addToCart = (
+  data: CartItemData,
+  p0: { headers: { Authorization: string } },
+) => {
   return request.post("/cart", data);
 };
 

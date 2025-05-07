@@ -3,26 +3,49 @@
     <el-empty
       v-if="shopStore.cartItems.length === 0"
       description="购物车空空如也~"
-      image="/empty-cart.svg"
     >
       <el-button type="primary" @click="$router.push('/shop')"
         >去逛逛</el-button
       >
     </el-empty>
     <el-table :data="shopStore.cartItems" v-loading="shopStore.loading">
-      <el-table-column prop="product.drugName" label="药品" />
-      <el-table-column prop="product.price" label="单价" width="100">
-        <template #default="{ row }"> ¥{{ row.product.price }} </template>
+      <!-- 药品图片列 -->
+      <el-table-column label="图片" width="100">
+        <template #default="{ row }">
+          <el-image
+            :src="row.product?.image"
+            fit="cover"
+            style="width: 60px; height: 60px"
+          />
+        </template>
       </el-table-column>
+
+      <!-- 药品名称列 -->
+      <el-table-column prop="product.drugName" label="药品名称" width="150" />
+
+      <!-- 药品价格列 -->
+      <el-table-column label="单价" width="100">
+        <template #default="{ row }">
+          ¥{{ (Number(row.product?.price) || 0).toFixed(2) }}
+        </template>
+      </el-table-column>
+
+      <!-- 数量列 -->
       <el-table-column label="数量" width="120">
         <template #default="{ row }">
           <el-input-number
             v-model="row.quantity"
             :min="1"
+            :max="row.product?.stock || 999"
             @change="shopStore.updateCartItem(row.id, row.quantity)"
+            controls-position="right"
+            size="small"
+            style="width: 110px"
           />
         </template>
       </el-table-column>
+
+      <!-- 操作列 -->
       <el-table-column label="操作" width="80">
         <template #default="{ row }">
           <el-button
@@ -69,13 +92,15 @@
       margin-bottom: 0;
       padding: 16px 20px;
       border-bottom: 1px solid #f0f0f0;
+      color: #333;
+      font-weight: 600;
     }
 
     .el-drawer__body {
       padding: 0;
       display: flex;
       flex-direction: column;
-      height: calc(100% - 56px);
+      height: calc(100% - 57px);
     }
   }
 
@@ -85,13 +110,19 @@
 
     :deep(.cell) {
       padding: 12px 0;
+      font-size: 14px;
+    }
+
+    :deep(th .cell) {
+      font-weight: 500;
+      color: #666;
     }
   }
 
   .cart-summary {
-    padding: 16px;
+    padding: 16px 20px;
     border-top: 1px solid #f0f0f0;
-    text-align: right;
+    background: #fafafa;
 
     p {
       margin: 8px 0;
@@ -107,6 +138,9 @@
     .el-button {
       margin-top: 16px;
       width: 100%;
+      height: 48px;
+      font-size: 16px;
+      border-radius: 4px;
     }
   }
 </style>
