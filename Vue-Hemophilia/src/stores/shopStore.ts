@@ -148,6 +148,9 @@ export const useShopStore = defineStore("shop", {
       }
     },
 
+    clearCart() {
+      this.cartItems = [];
+    },
     // 分页控制
     setPage(page: number) {
       this.pagination.page = page;

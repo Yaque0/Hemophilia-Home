@@ -59,3 +59,11 @@ export const adminAuth = async (
     res.status(401).json({ message: "请先登录" });
   }
 };
+// 验证token
+export const verifyToken = (token: string): JwtPayload | null => {
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+  } catch (err) {
+    return null;
+  }
+};

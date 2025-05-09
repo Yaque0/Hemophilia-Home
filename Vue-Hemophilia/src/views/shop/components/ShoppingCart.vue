@@ -62,26 +62,71 @@
     <div class="cart-summary">
       <p>共 {{ shopStore.cartTotalItems }} 件商品</p>
       <p class="total-price">总计: ¥{{ shopStore.cartTotalPrice }}</p>
-      <el-button type="primary" size="large">结算</el-button>
+      <el-button
+        type="primary"
+        size="large"
+        @click="handleCheckout"
+        :loading="checkoutLoading"
+        >结算</el-button
+      >
     </div>
+    <QrCode
+      ref="qrcodeRef"
+      :ws-url="wsServerUrl"
+      :initial-url="initialQrUrl"
+      :usage-type="'payment'"
+      @success="handlePaymentSuccess"
+    />
   </el-drawer>
 </template>
 
 <script setup lang="ts">
   import { useShopStore } from "@/stores/shopStore";
-  import { computed } from "vue";
-
+  import { ElMessage } from "element-plus";
+  import { computed, nextTick, ref } from "vue";
+  import QrCode from "./QrCode.vue"; // 引入 QrCode 组件
   const shopStore = useShopStore();
   const props = defineProps<{
     visible: boolean;
   }>();
-
+  const qrcodeRef = ref<InstanceType<typeof QrCode>>(); // 组件实例类型
   const emit = defineEmits(["close"]);
 
   const visible = computed({
     get: () => props.visible,
     set: (val) => !val && emit("close"),
   });
+  // 动态生成WebSocket地址
+  const wsServerUrl = computed(() => {
+    return `ws://localhost:3000/ws?type=payment`;
+  });
+  // 初始二维码URL，含总价
+  const initialQrUrl = computed(() => {
+    return `${window.location.origin}/payment?amount=${shopStore.cartTotalPrice}`;
+  });
+  const handlePaymentSuccess = (data: any) => {
+    ElMessage.success(`支付成功，金额: ¥${data.amount}`);
+    shopStore.clearCart();
+
+    visible.value = false;
+  };
+  const checkoutLoading = ref(false);
+
+  const handleCheckout = () => {
+    if (!qrcodeRef.value) {
+      return ElMessage.error("支付组件初始化失败");
+    }
+    checkoutLoading.value = true;
+    nextTick(() => {
+      try {
+        qrcodeRef.value?.open();
+      } catch (e) {
+        console.error("支付弹窗打开失败:", e);
+        ElMessage.error("支付系统初始化失败");
+      }
+    });
+    setTimeout(() => (checkoutLoading.value = false), 500);
+  };
 </script>
 
 <style scoped lang="scss">
