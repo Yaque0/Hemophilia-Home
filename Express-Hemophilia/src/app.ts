@@ -16,6 +16,8 @@ import { createServer } from "http";
 import { fileURLToPath } from "url";
 import adminRouter from "./routes/admin.routes";
 
+import videoRouter from "./routes/video.routes";
+
 import wss from "./routes/ws.routes"; // 引入你定义的 WebSocket 服务器
 dotenv.config();
 
@@ -50,6 +52,7 @@ app.use("/api/users", userRouter);
 app.use("/api/upload", uploadRouter);
 app.use("/api/news", newsRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/video", videoRouter);
 
 // 数据库连接和服务器.ws启动
 const PORT = process.env.PORT || 3000;
